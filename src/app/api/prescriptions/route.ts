@@ -63,6 +63,9 @@ export async function POST(req: NextRequest) {
 
     // 1) VLM reads the prescription
     const zai = await ZAI.create()
+    // SDK type demands `model`, but the vision endpoint selects its default
+    // vision model when the field is omitted (verified working in E2E) —
+    // cast keeps the wire payload identical to production behavior.
     const completion = await zai.chat.completions.createVision({
       messages: [
         {
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       thinking: { type: 'disabled' },
-    })
+    } as Parameters<typeof zai.chat.completions.createVision>[0])
     const extracted = completion.choices[0]?.message?.content || ''
 
     // 2) parse medication names

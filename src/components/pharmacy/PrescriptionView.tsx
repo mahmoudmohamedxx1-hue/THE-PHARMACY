@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 interface Match {
   medicine: string; productId: string; nameEn: string; nameAr: string; price: number
   stock: number; confidence: number; prescriptionRequired: boolean; brand: string; slug: string
+  imageUrl: string
 }
 
 interface RxResult {

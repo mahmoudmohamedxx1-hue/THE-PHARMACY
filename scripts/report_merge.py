@@ -1,40 +1,29 @@
 #!/usr/bin/env python3
-"""Merge cover + body into the final report PDF (normalized to A4)."""
+"""Merge Template 07 cover + ReportLab body into the final report PDF."""
 from pypdf import PdfReader, PdfWriter
 
 A4_W, A4_H = 595.28, 841.89
 
-COVER = '/home/z/my-project/scripts/report_assets/cover.pdf'
-BODY = '/home/z/my-project/scripts/report_assets/body.pdf'
-OUT = '/home/z/my-project/download/The_Pharmacy_Competitive_Landscape_Report.pdf'
-
-
-def normalize_page_to_a4(page):
+def normalize(page):
     box = page.mediabox
     w, h = float(box.width), float(box.height)
-    if abs(w - A4_W) > 0.1 or abs(h - A4_H) > 0.1:
+    if abs(w - A4_W) > 0.3 or abs(h - A4_H) > 0.3:
         page.scale_to(A4_W, A4_H)
     return page
 
+ASSETS = "/home/z/my-project/scripts/report-assets"
+OUT = "/home/z/my-project/download/The_Pharmacy_QA_Audit_and_Strategy_Report.pdf"
 
 writer = PdfWriter()
-writer.add_page(normalize_page_to_a4(PdfReader(COVER).pages[0]))
-for page in PdfReader(BODY).pages:
-    writer.add_page(normalize_page_to_a4(page))
+writer.add_page(normalize(PdfReader(f"{ASSETS}/cover.pdf").pages[0]))
+for page in PdfReader(f"{ASSETS}/body.pdf").pages:
+    writer.add_page(normalize(page))
 writer.add_metadata({
-    '/Title': 'The Pharmacy - Platform Status & Competitive Landscape Report',
-    '/Author': 'The Pharmacy Strategy & Product Team',
-    '/Creator': 'Z.ai',
-    '/Subject': 'Egypt e-pharmacy market analysis, competitor deep-dive, SWOT and '
-                '90-day launch roadmap',
+    "/Title": "The Pharmacy QA Audit and Strategic Position Report",
+    "/Author": "Z.ai",
+    "/Creator": "Z.ai",
+    "/Subject": "Comprehensive quality audit, market position, and 90-day roadmap",
 })
-import os
-os.makedirs('/home/z/my-project/download', exist_ok=True)
-with open(OUT, 'wb') as f:
+with open(OUT, "wb") as f:
     writer.write(f)
-
-r = PdfReader(OUT)
-sizes = {(round(float(p.mediabox.width)), round(float(p.mediabox.height))) for p in r.pages}
-print('Final PDF:', OUT)
-print('Pages:', len(r.pages), '| page sizes:', sizes)
-print('Size on disk: %.1f KB' % (os.path.getsize(OUT) / 1024))
+print("merged:", OUT, "-", len(writer.pages), "pages")

@@ -1,0 +1,104 @@
+{
+  "summary": {
+    "passed": 24,
+    "total": 24
+  },
+  "checks": {
+    "product_count": {
+      "pass": true,
+      "detail": "496 products (expect >=480)"
+    },
+    "names_complete": {
+      "pass": true,
+      "detail": "all products have EN+AR names"
+    },
+    "price_sane": {
+      "pass": true,
+      "detail": "no zero/negative prices"
+    },
+    "stock_sane": {
+      "pass": true,
+      "detail": "no negative stock"
+    },
+    "descriptions_complete": {
+      "pass": true,
+      "detail": "all products have EN+AR descriptions"
+    },
+    "unique_slugs": {
+      "pass": true,
+      "detail": "0 duplicate slugs"
+    },
+    "desc_uniqueness": {
+      "pass": true,
+      "detail": "most repeated EN desc appears 3x (<=3 OK for size variants)"
+    },
+    "desc_depth": {
+      "pass": true,
+      "detail": "0 thin descriptions <60 chars"
+    },
+    "image_files_exist": {
+      "pass": true,
+      "detail": "482 DB image refs, 0 missing on disk"
+    },
+    "image_coverage": {
+      "pass": true,
+      "detail": "482/496 have photos (14 fallbacks, expect <=20)"
+    },
+    "image_weight": {
+      "pass": true,
+      "detail": "482 files, 17.2 MB total, 0 files >400KB"
+    },
+    "category_count": {
+      "pass": true,
+      "detail": "10 categories"
+    },
+    "categories_have_products": {
+      "pass": true,
+      "detail": "empty categories: none"
+    },
+    "order_math": {
+      "pass": true,
+      "detail": "16 orders, 0 math errors "
+    },
+    "no_orphan_items": {
+      "pass": true,
+      "detail": "orphan OrderItems: 0"
+    },
+    "orders_have_items": {
+      "pass": true,
+      "detail": "orders w/o items: none"
+    },
+    "delivery_fee_logic": {
+      "pass": true,
+      "detail": "fee logic anomalies: none (demo orders may predate rule)"
+    },
+    "users": {
+      "pass": true,
+      "detail": "admin + demo users present"
+    },
+    "passwords_hashed": {
+      "pass": true,
+      "detail": "no empty password hashes"
+    },
+    "sessions_table": {
+      "pass": true,
+      "detail": "25 sessions (auth working per API tests)"
+    },
+    "prescriptions": {
+      "pass": true,
+      "detail": "2 prescriptions stored"
+    },
+    "oos_catalog_share": {
+      "pass": true,
+      "detail": "23/496 out of stock (4.6%, expect <15%)"
+    },
+    "price_range": {
+      "pass": true,
+      "detail": "min 10.0, max 2450.0, avg 196 EGP"
+    },
+    "pwa_assets": {
+      "pass": true,
+      "detail": "manifest=True, sw=True, 7 icons + splash dir"
+    }
+  }
+}

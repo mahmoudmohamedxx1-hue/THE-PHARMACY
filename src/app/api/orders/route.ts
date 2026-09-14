@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : zoneInfo.fee
     const total = Math.round((subtotal + deliveryFee) * 100) / 100
-    const orderNumber = `TP-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`
+    const orderNumber = `TP-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 9000 + 1000)}`
 
     const order = await db.order.create({
       data: {

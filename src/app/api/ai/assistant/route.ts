@@ -48,8 +48,11 @@ ${catalog}`
     const zai = await ZAI.create()
     const completion = await zai.chat.completions.create({
       messages: [
-        { role: 'assistant', content: system },
-        ...history.map((m: any) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: String(m.content || '').slice(0, 2000) })),
+        { role: 'system', content: system },
+        ...history.map((m: { role?: string; content?: string }) => ({
+          role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+          content: String(m.content || '').slice(0, 2000),
+        })),
       ],
       thinking: { type: 'disabled' },
     })

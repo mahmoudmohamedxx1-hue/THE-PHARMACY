@@ -1,105 +1,120 @@
 #!/usr/bin/env python3
-"""Charts for The Pharmacy competitive analysis report.
-Follows typesetting/charts.md: no top/right spines, dashed grid 20% opacity,
-horizontal bars for long labels, value labels, legend outside, Template 07 palette.
+"""Charts for The Pharmacy QA Audit & Strategy report.
+Template 07 Crystal Blue palette family. English labels (user language).
+Rules: no top/right spines, dashed grid 20%, direct value labels, no legend boxes.
 """
 import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-import numpy as np
-import os
-
 fm.fontManager.addfont('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+import matplotlib.pyplot as plt
+
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
-plt.rcParams['font.size'] = 11
 
-# Template 07 body palette (fixed)
+# Template 07 Crystal Blue family
 ACCENT = '#2d7ab3'
-HEADER_FILL = '#1a4a7a'
-BORDER = '#c0d0e2'
-TEXT_PRIMARY = '#142840'
-TEXT_MUTED = '#5a7a96'
+DEEP = '#1a4a7a'
+LIGHT = '#c0d0e2'
+MUTED = '#5a7a96'
+TEXT = '#142840'
+BG = '#ffffff'
 
-OUT = '/home/z/my-project/scripts/report_assets'
+OUT = '/home/z/my-project/scripts/report-assets'
+import os
 os.makedirs(OUT, exist_ok=True)
-
 
 def style_ax(ax):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color(BORDER)
-    ax.spines['bottom'].set_color(BORDER)
-    ax.tick_params(colors=TEXT_MUTED, labelsize=10)
-    ax.grid(True, linestyle='--', alpha=0.2, linewidth=0.5, color=TEXT_MUTED)
+    ax.spines['left'].set_color(LIGHT)
+    ax.spines['bottom'].set_color(LIGHT)
+    ax.tick_params(colors=MUTED, labelsize=11)
+    ax.grid(True, axis='x', linestyle='--', alpha=0.2, linewidth=0.5)
     ax.set_axisbelow(True)
 
+# ============ CHART 1: QA test suite results ============
+suites = ['API functional', 'SEO / PWA', 'Data integrity', 'Security', 'E2E user flows', 'Cross-runtime']
+counts = [60, 23, 24, 14, 11, 3]
 
-# ── Chart 1: Egypt E-Pharmacy & Digital Health market projection ──
+fig, ax = plt.subplots(figsize=(9, 4.6), constrained_layout=True)
+bars = ax.barh(suites[::-1], counts[::-1], color=ACCENT, height=0.62, edgecolor='none', zorder=3)
+bars[-1].set_color(DEEP)  # highlight the largest suite
+style_ax(ax)
+for bar, c in zip(bars, counts[::-1]):
+    ax.text(bar.get_width() + 0.8, bar.get_y() + bar.get_height() / 2, f'{c}/{c}  passed',
+            va='center', ha='left', fontsize=11.5, color=TEXT, fontweight='bold')
+ax.set_xlim(0, 72)
+ax.set_xlabel('Automated checks executed (all passing)', fontsize=11, color=MUTED)
+ax.set_xticks([0, 20, 40, 60])
+fig.savefig(f'{OUT}/chart_qa.png', dpi=220, facecolor=BG)
+plt.close(fig)
+
+# ============ CHART 2: Performance transformation ============
+stages = ['Dev mode\n(before)', 'Production\n(raw)', 'Production\n(gzipped)']
+sizes = [5517, 909, 290]
+colors = [MUTED, ACCENT, DEEP]
+
+fig, ax = plt.subplots(figsize=(8.6, 4.6), constrained_layout=True)
+bars = ax.bar(stages, sizes, color=colors, width=0.52, edgecolor='none', zorder=3)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_color(LIGHT)
+ax.spines['bottom'].set_color(LIGHT)
+ax.tick_params(colors=MUTED, labelsize=11.5)
+ax.grid(True, axis='y', linestyle='--', alpha=0.2, linewidth=0.5)
+ax.set_axisbelow(True)
+for bar, s in zip(bars, sizes):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 110,
+            f'{s:,} KB', ha='center', fontsize=13, color=TEXT, fontweight='bold')
+ax.annotate('-95%', xy=(1.5, 3000), fontsize=15, color=DEEP, fontweight='bold', ha='center')
+ax.set_ylim(0, 6300)
+ax.set_ylabel('JavaScript shipped to browser (KB)', fontsize=11, color=MUTED)
+fig.savefig(f'{OUT}/chart_perf.png', dpi=220, facecolor=BG)
+plt.close(fig)
+
+# ============ CHART 3: Egypt e-pharmacy market ============
 years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032]
-vals = [69, 82, 98, 117, 139, 166, 198, 236]
+vals = [69, 82, 98, 117, 140, 167, 199, 236]  # 19.2% CAGR interpolation
 
-fig, ax = plt.subplots(figsize=(8.0, 3.4), dpi=200, constrained_layout=True)
-style_ax(ax)
-ax.plot(years, vals, color=ACCENT, linewidth=2.5, solid_capstyle='round', zorder=3)
-ax.fill_between(years, vals, 0, color=ACCENT, alpha=0.14, zorder=2)
-# Label first and last points only (first/last/max/min rule)
-ax.scatter([years[0], years[-1]], [vals[0], vals[-1]], color=HEADER_FILL, s=28, zorder=4)
-ax.annotate('$69M', (years[0], vals[0]), textcoords='offset points', xytext=(2, 10),
-            fontsize=10.5, color=TEXT_PRIMARY, fontweight='bold')
-ax.annotate('$236M', (years[-1], vals[-1]), textcoords='offset points', xytext=(-30, 10),
-            fontsize=10.5, color=TEXT_PRIMARY, fontweight='bold')
+fig, ax = plt.subplots(figsize=(8.6, 4.4), constrained_layout=True)
+ax.plot(years, vals, color=ACCENT, linewidth=2.6, solid_capstyle='round', zorder=4)
+ax.fill_between(years, vals, color=ACCENT, alpha=0.12, zorder=2)
+ax.scatter([years[0], years[-1]], [vals[0], vals[-1]], s=42, color=DEEP, zorder=5)
+ax.annotate('$69M', xy=(2025, 69), xytext=(2025.05, 92), fontsize=13, color=TEXT, fontweight='bold')
+ax.annotate('$236M', xy=(2032, 236), xytext=(2031.1, 250), fontsize=13, color=TEXT, fontweight='bold')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_color(LIGHT)
+ax.spines['bottom'].set_color(LIGHT)
+ax.tick_params(colors=MUTED, labelsize=11)
+ax.grid(True, axis='y', linestyle='--', alpha=0.2, linewidth=0.5)
+ax.set_axisbelow(True)
+ax.set_ylim(0, 285)
 ax.set_xticks(years)
-ax.set_ylabel('USD millions', color=TEXT_MUTED, fontsize=10)
-ax.set_ylim(0, 270)
-ax.set_xlim(2024.7, 2032.3)
-fig.savefig(f'{OUT}/chart_market.png', facecolor='white')
+ax.set_ylabel('Market size (USD millions)', fontsize=11, color=MUTED)
+ax.text(2025.1, 258, 'Egypt e-pharmacy market, 19.2% CAGR (Ken Research)', fontsize=10.5, color=MUTED)
+fig.savefig(f'{OUT}/chart_market.png', dpi=220, facecolor=BG)
 plt.close(fig)
 
-# ── Chart 2: Disclosed funding of Egyptian e-pharmacy players ──
-players = ['Yodawy', 'Chefaa', 'The Pharmacy']
-funding = [34.5, 18.3, 0.0]
-labels = ['$34.5M', '$18.3M', 'Self-funded\n(owned codebase)']
-bar_colors = [BORDER, '#7fa8c9', ACCENT]
+# ============ CHART 4: Competitor funding ============
+players = ['Vezeeta', 'Yodawy', 'Chefaa', 'The Pharmacy\n(this project)']
+funding = [60, 35, 10, 0]
 
-fig, ax = plt.subplots(figsize=(7.6, 2.5), dpi=200, constrained_layout=True)
+fig, ax = plt.subplots(figsize=(9, 4.4), constrained_layout=True)
+bars = ax.barh(players[::-1], funding[::-1], color=[ACCENT, ACCENT, ACCENT, DEEP][::-1], height=0.6, edgecolor='none', zorder=3)
 style_ax(ax)
-bars = ax.barh(players, funding, color=bar_colors, height=0.52, edgecolor='none', zorder=3)
-ax.set_xlim(0, 44)
-ax.invert_yaxis()
-for i, (b, lab) in enumerate(zip(bars, labels)):
-    ax.annotate(lab, (b.get_width(), b.get_y() + b.get_height() / 2),
-                textcoords='offset points', xytext=(8, 0), va='center',
-                fontsize=10, color=TEXT_PRIMARY, fontweight='bold')
-ax.set_xlabel('Total disclosed funding (USD millions)', color=TEXT_MUTED, fontsize=10)
-ax.set_xticks([0, 10, 20, 30, 40])
-fig.savefig(f'{OUT}/chart_funding.png', facecolor='white')
+labels = ['$60M+', '$35M', '~$10M', '$0 (bootstrapped)']
+for bar, lab in zip(bars, labels[::-1]):
+    x = bar.get_width() + 1 if bar.get_width() > 0 else 1.2
+    ha = 'left'
+    ax.text(x, bar.get_y() + bar.get_height() / 2, lab, va='center', ha=ha,
+            fontsize=11.5, color=TEXT, fontweight='bold')
+ax.set_xlim(0, 74)
+ax.set_xlabel('Total equity funding raised (USD millions, public reports)', fontsize=11, color=MUTED)
+ax.set_xticks([0, 20, 40, 60])
+fig.savefig(f'{OUT}/chart_funding.png', dpi=220, facecolor=BG)
 plt.close(fig)
 
-# ── Chart 3: The Pharmacy catalog composition ──
-cats = ['Hair Care', 'Medications', 'Skin Care', 'Daily Essentials', 'Mom & Baby',
-        'Medical Supplies', 'Vitamins & Supplements', 'Makeup', 'Sexual Health', 'Pet Supplies']
-counts = [223, 104, 50, 49, 15, 15, 14, 12, 8, 6]
-
-fig, ax = plt.subplots(figsize=(7.6, 3.9), dpi=200, constrained_layout=True)
-style_ax(ax)
-y = np.arange(len(cats))
-shades = [ACCENT if c >= 50 else '#7fa8c9' for c in counts]
-bars = ax.barh(y, counts, color=shades, height=0.6, edgecolor='none', zorder=3)
-ax.set_yticks(y)
-ax.set_yticklabels(cats, fontsize=10, color=TEXT_PRIMARY)
-ax.invert_yaxis()
-ax.set_xlim(0, 250)
-for b, c in zip(bars, counts):
-    ax.annotate(str(c), (b.get_width(), b.get_y() + b.get_height() / 2),
-                textcoords='offset points', xytext=(6, 0), va='center',
-                fontsize=9.5, color=TEXT_PRIMARY, fontweight='bold')
-ax.set_xlabel('Products in catalog (n = 496)', color=TEXT_MUTED, fontsize=10)
-ax.set_xticks([0, 50, 100, 150, 200, 250])
-fig.savefig(f'{OUT}/chart_catalog.png', facecolor='white')
-plt.close(fig)
-
-print('Charts generated:')
+print("4 charts saved to", OUT)
 for f in sorted(os.listdir(OUT)):
-    print(' -', f, os.path.getsize(os.path.join(OUT, f)), 'bytes')
+    print(" -", f, f"{os.path.getsize(os.path.join(OUT, f))//1024} KB")

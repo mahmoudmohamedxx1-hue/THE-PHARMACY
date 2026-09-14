@@ -40,7 +40,9 @@ export async function PATCH(req: NextRequest) {
     if (isFeatured !== undefined) data.isFeatured = !!isFeatured
     const updated = await db.product.update({ where: { id }, data })
     return NextResponse.json({ product: updated })
-  } catch (e) {
+  } catch (e: any) {
+    // Prisma P2025 = record to update not found -> proper 404, not a 500
+    if (e?.code === 'P2025') return NextResponse.json({ error: 'not_found' }, { status: 404 })
     console.error('admin product patch error', e)
     return NextResponse.json({ error: 'server_error' }, { status: 500 })
   }

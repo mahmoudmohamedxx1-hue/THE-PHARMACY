@@ -1,0 +1,123 @@
+{
+  "summary": {
+    "passed": 23,
+    "total": 23
+  },
+  "results": [
+    {
+      "name": "sitemap_valid_xml",
+      "pass": true,
+      "detail": "510 URLs in sitemap.xml"
+    },
+    {
+      "name": "sitemap_coverage",
+      "pass": true,
+      "detail": "496 product URLs + 10 category URLs + 4 static"
+    },
+    {
+      "name": "sitemap_urls_https_ready",
+      "pass": true,
+      "detail": "sample: http://localhost:3000"
+    },
+    {
+      "name": "robots_admin_excluded",
+      "pass": true,
+      "detail": "/admin disallowed"
+    },
+    {
+      "name": "robots_api_excluded",
+      "pass": true,
+      "detail": "/api disallowed"
+    },
+    {
+      "name": "robots_sitemap_ref",
+      "pass": true,
+      "detail": "sitemap referenced"
+    },
+    {
+      "name": "product_title",
+      "pass": true,
+      "detail": "product name in <title>"
+    },
+    {
+      "name": "product_meta_desc",
+      "pass": true,
+      "detail": "meta description present"
+    },
+    {
+      "name": "product_og",
+      "pass": true,
+      "detail": "OpenGraph title+image"
+    },
+    {
+      "name": "product_twitter",
+      "pass": true,
+      "detail": "Twitter card"
+    },
+    {
+      "name": "product_jsonld",
+      "pass": true,
+      "detail": "schema.org Product JSON-LD"
+    },
+    {
+      "name": "product_jsonld_offers",
+      "pass": true,
+      "detail": "JSON-LD offers: True, price 48"
+    },
+    {
+      "name": "canonical",
+      "pass": true,
+      "detail": "canonical URL"
+    },
+    {
+      "name": "home_title_bilingual",
+      "pass": true,
+      "detail": "bilingual home title"
+    },
+    {
+      "name": "manifest_valid",
+      "pass": true,
+      "detail": "name=The Pharmacy | \u0630\u0627 \u0641\u0627\u0631\u0645\u064a\u0633\u064a, 4 icons, dir=rtl"
+    },
+    {
+      "name": "manifest_rtl",
+      "pass": true,
+      "detail": "RTL-aware manifest"
+    },
+    {
+      "name": "manifest_maskable",
+      "pass": true,
+      "detail": "maskable icon present"
+    },
+    {
+      "name": "sw_offline_fallback",
+      "pass": true,
+      "detail": "service worker offline fallback route"
+    },
+    {
+      "name": "sw_cache_first_assets",
+      "pass": true,
+      "detail": "cache-first strategy for assets"
+    },
+    {
+      "name": "offline_page_200",
+      "pass": true,
+      "detail": "/offline -> 200"
+    },
+    {
+      "name": "html_lang_attr",
+      "pass": true,
+      "detail": "html lang attribute"
+    },
+    {
+      "name": "viewport_meta",
+      "pass": true,
+      "detail": "viewport meta for responsive"
+    },
+    {
+      "name": "img_alt_presence",
+      "pass": true,
+      "detail": "26 alt attributes on home"
+    }
+  ]
+}

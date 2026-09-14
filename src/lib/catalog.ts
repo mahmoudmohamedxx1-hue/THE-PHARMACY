@@ -100,7 +100,7 @@ export async function getProducts(params: ProductQueryParams): Promise<ProductsD
     ]
   }
 
-  let orderBy: Prisma.ProductOrderByWithRelationInput
+  let orderBy: Prisma.ProductOrderByWithRelationInput[]
   switch (params.sort) {
     case 'price-asc': orderBy = [{ price: 'asc' }, { popularity: 'desc' }]; break
     case 'price-desc': orderBy = [{ price: 'desc' }, { popularity: 'desc' }]; break

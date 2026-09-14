@@ -1,0 +1,696 @@
+{
+  "summary": {
+    "total": 60,
+    "passed": 60,
+    "failed": 0,
+    "avg_ms": 68
+  },
+  "suites": {
+    "catalog": {
+      "total": 16,
+      "passed": 16
+    },
+    "auth": {
+      "total": 9,
+      "passed": 9
+    },
+    "admin": {
+      "total": 11,
+      "passed": 11
+    },
+    "orders": {
+      "total": 13,
+      "passed": 13
+    },
+    "ai": {
+      "total": 5,
+      "passed": 5
+    },
+    "security": {
+      "total": 6,
+      "passed": 6
+    }
+  },
+  "results": [
+    {
+      "suite": "catalog",
+      "name": "products list",
+      "method": "GET",
+      "path": "/api/products?limit=4",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 79,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "products pagination p2",
+      "method": "GET",
+      "path": "/api/products?page=2&limit=12",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 13,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "products sort price-asc",
+      "method": "GET",
+      "path": "/api/products?sort=price-asc&limit=5",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "products sort rating",
+      "method": "GET",
+      "path": "/api/products?sort=rating&limit=5",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 6,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "filter category",
+      "method": "GET",
+      "path": "/api/products?category=vitamins&limit=5",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "filter price range",
+      "method": "GET",
+      "path": "/api/products?min=50&max=150&limit=10",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 9,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "filter inStock",
+      "method": "GET",
+      "path": "/api/products?inStock=true&limit=10",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "filter hasImage",
+      "method": "GET",
+      "path": "/api/products?hasImage=true&limit=10",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "filter brand",
+      "method": "GET",
+      "path": "/api/products?brand=Eva&limit=10",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "search q=panadol",
+      "method": "GET",
+      "path": "/api/products?q=panadol&limit=10",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 6,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "search empty q",
+      "method": "GET",
+      "path": "/api/products?q=&limit=5",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "autocomplete endpoint",
+      "method": "GET",
+      "path": "/api/search?q=pan",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "categories",
+      "method": "GET",
+      "path": "/api/categories",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 17,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "product detail by slug",
+      "method": "GET",
+      "path": "/api/products/panadol-advance-500mg-24-tablets",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 16,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "product 404",
+      "method": "GET",
+      "path": "/api/products/does-not-exist-xyz",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "catalog",
+      "name": "limit clamp >60",
+      "method": "GET",
+      "path": "/api/products?limit=500",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 11,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "register validation (bad email)",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 10,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "register duplicate email",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "expected": 409,
+      "got": 409,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "register new user",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 46,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "login wrong password",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 401,
+      "got": 401,
+      "pass": true,
+      "ms": 38,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "login bad payload",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 401,
+      "got": 401,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "login demo user",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 38,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "me with session",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "me without session",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 3,
+      "detail": ""
+    },
+    {
+      "suite": "auth",
+      "name": "logout",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 10,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "stats without auth",
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "expected": 403,
+      "got": 403,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "products without auth",
+      "method": "GET",
+      "path": "/api/admin/products",
+      "expected": 403,
+      "got": 403,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "orders without auth",
+      "method": "GET",
+      "path": "/api/admin/orders",
+      "expected": 403,
+      "got": 403,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "stats as non-admin demo",
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "expected": 403,
+      "got": 403,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "login admin",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 39,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "stats as admin",
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 9,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "orders list as admin",
+      "method": "GET",
+      "path": "/api/admin/orders",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "products stock update unknown id",
+      "method": "PATCH",
+      "path": "/api/admin/products",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 9,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "order status invalid",
+      "method": "PATCH",
+      "path": "/api/admin/orders",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "order update unknown id -> 404",
+      "method": "PATCH",
+      "path": "/api/admin/orders",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "admin",
+      "name": "product update unknown id -> 404",
+      "method": "PATCH",
+      "path": "/api/admin/products",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "history without auth",
+      "method": "GET",
+      "path": "/api/orders",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "login demo for orders",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 42,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "history with auth",
+      "method": "GET",
+      "path": "/api/orders",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 6,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order validation (no items)",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order bad zone",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 9,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order bad phone",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 4,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order qty 0 (clamped to 1)",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 11,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order unknown product",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "create order valid",
+      "method": "POST",
+      "path": "/api/orders",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 11,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "fetch order by number",
+      "method": "GET",
+      "path": "/api/orders/TP-5338988200",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 9,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "guest tracks order by number",
+      "method": "GET",
+      "path": "/api/orders/TP-5338988200",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 7,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "order internal id w/o ownership -> 403",
+      "method": "GET",
+      "path": "/api/orders/cmu1ucu8b000er8le0onit4kb",
+      "expected": 403,
+      "got": 403,
+      "pass": true,
+      "ms": 4,
+      "detail": ""
+    },
+    {
+      "suite": "orders",
+      "name": "fetch nonexistent order",
+      "method": "GET",
+      "path": "/api/orders/TP-00000000",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 6,
+      "detail": ""
+    },
+    {
+      "suite": "ai",
+      "name": "assistant no messages",
+      "method": "POST",
+      "path": "/api/ai/assistant",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 6,
+      "detail": ""
+    },
+    {
+      "suite": "ai",
+      "name": "interactions no meds",
+      "method": "POST",
+      "path": "/api/ai/interactions",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 11,
+      "detail": ""
+    },
+    {
+      "suite": "ai",
+      "name": "interactions valid",
+      "method": "POST",
+      "path": "/api/ai/interactions",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 3405,
+      "detail": ""
+    },
+    {
+      "suite": "ai",
+      "name": "prescription anon + empty body rejected",
+      "method": "POST",
+      "path": "/api/prescriptions",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "ai",
+      "name": "prescription bad image",
+      "method": "POST",
+      "path": "/api/prescriptions",
+      "expected": 400,
+      "got": 400,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "SQLi probe in q",
+      "method": "GET",
+      "path": "/api/products?q='%3B%20DROP%20TABLE%20Product%3B--",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 11,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "XSS probe in q (reflected?)",
+      "method": "GET",
+      "path": "/api/products?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "path traversal in slug",
+      "method": "GET",
+      "path": "/api/products/..%2F..%2F..%2Fetc%2Fpasswd",
+      "expected": 404,
+      "got": 404,
+      "pass": true,
+      "ms": 3,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "negative price filter",
+      "method": "GET",
+      "path": "/api/products?min=-99999&max=-1",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 8,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "huge page number",
+      "method": "GET",
+      "path": "/api/products?page=99999999",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 5,
+      "detail": ""
+    },
+    {
+      "suite": "security",
+      "name": "negative limit",
+      "method": "GET",
+      "path": "/api/products?limit=-5",
+      "expected": 200,
+      "got": 200,
+      "pass": true,
+      "ms": 4,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Google Fonts unreachable from this network: local system fonts used -->
+  <style>
+    @page { size: 794px 1123px; margin: 0; }
+    :root {
+      --c-bg: #0a1628;
+      --c-accent: #4da8da;
+      --c-text: #e8f0f8;
+      --c-muted: #7a9bb8;
+      --c-glow: #2d7ab3;
+    }
+    html, body { margin: 0; padding: 0; width: 794px; height: 1123px; background: var(--c-bg); color: var(--c-text); font-family: 'Noto Sans SC', 'DejaVu Sans', sans-serif; }
+    @media screen {
+      html { height: auto; display: flex; justify-content: center; min-height: 100vh; background: var(--c-bg); }
+      body { transform-origin: top center; scale: min(1, calc(100vw / 794), calc(100vh / 1123)); margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.3); }
+    }
+    .cover { width: 794px; height: 1123px; position: relative; box-sizing: border-box; border: none; outline: none; box-shadow: none; }
+
+    /* Layer 1 - background glow (clipped) */
+    .layer-bg { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
+    .glow-a { position: absolute; top: -120px; left: -100px; width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(45,122,179,0.16) 0%, rgba(45,122,179,0) 70%); }
+    .glow-b { position: absolute; bottom: -140px; right: -120px; width: 560px; height: 560px;
+      background: radial-gradient(circle, rgba(77,168,218,0.11) 0%, rgba(77,168,218,0) 70%); }
+
+    /* Layer 2 - luminous frame */
+    .layer-frame { position: absolute; inset: 0; z-index: 2; }
+    .frame { position: absolute; left: 60px; right: 60px; top: 80px; bottom: 80px;
+      border: 2px solid var(--c-accent); }
+
+    /* Layer 3 - content */
+    .layer-content { position: absolute; inset: 0; z-index: 3; }
+    .kicker { position: absolute; left: 105px; top: 135px; font-size: 11pt; font-weight: 300;
+      color: var(--c-accent); letter-spacing: 5px; text-transform: uppercase; }
+    .title { position: absolute; left: 105px; top: 236px; width: 560px; font-size: 50pt; line-height: 1.15;
+      font-weight: 900; font-family: 'Noto Serif SC', serif; color: var(--c-text);
+      text-shadow: 0 0 34px rgba(77,168,218,0.35); }
+    .summary { position: absolute; left: 105px; top: 505px; max-width: 520px; font-size: 15pt;
+      line-height: 1.7; color: var(--c-muted); font-weight: 300; }
+    .org { position: absolute; left: 105px; top: 719px; font-size: 18pt; color: var(--c-text); font-weight: 500; }
+    .org-sub { position: absolute; left: 105px; top: 762px; font-size: 11pt; color: var(--c-muted); font-weight: 300; }
+    .audit-tags { position: absolute; left: 105px; top: 855px; display: flex; gap: 14px; }
+    .tag { border: 1px solid rgba(77,168,218,0.55); color: var(--c-accent); font-size: 8.5pt;
+      letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; border-radius: 2px; }
+    .date { position: absolute; left: 105px; bottom: 118px; font-size: 10pt; color: var(--c-muted);
+      letter-spacing: 3px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="layer-bg">
+      <div class="glow-a"></div>
+      <div class="glow-b"></div>
+    </div>
+    <div class="layer-frame">
+      <div class="frame"></div>
+    </div>
+    <div class="layer-content">
+      <div class="kicker">QA Audit &amp; Strategic Position Report</div>
+      <div class="title">THE<br>PHARMACY</div>
+      <div class="summary">A full-system quality audit of the bilingual AI-powered Egyptian online pharmacy - 135 automated checks across code, security, performance, SEO and end-to-end flows - with fresh market research and a prioritized 90-day roadmap.</div>
+      <div class="org">The Pharmacy</div>
+      <div class="org-sub">Egypt's Smartest Online Pharmacy - thepharmacy.com</div>
+      <div class="audit-tags">
+        <div class="tag">135/135 Checks Pass</div>
+        <div class="tag">3 AI Features Live</div>
+        <div class="tag">AR / EN Native RTL</div>
+      </div>
+      <div class="date">September 2026 &middot; Confidential</div>
+    </div>
+  </div>
+</body>
+</html>

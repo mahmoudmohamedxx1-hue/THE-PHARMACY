@@ -1,0 +1,130 @@
+{
+  "routes": [
+    {
+      "name": "home",
+      "path": "/",
+      "ttfb_ms": 7.2,
+      "size_kb": 189.5,
+      "ok": true
+    },
+    {
+      "name": "category",
+      "path": "/category/vitamins",
+      "ttfb_ms": 59.1,
+      "size_kb": 144.4,
+      "ok": true
+    },
+    {
+      "name": "product",
+      "path": "/product/panadol-advance-500mg-24-tablets",
+      "ttfb_ms": 31.1,
+      "size_kb": 93.6,
+      "ok": true
+    },
+    {
+      "name": "search",
+      "path": "/search/panadol",
+      "ttfb_ms": 31.6,
+      "size_kb": 97.8,
+      "ok": true
+    },
+    {
+      "name": "cart",
+      "path": "/cart",
+      "ttfb_ms": 3.3,
+      "size_kb": 45.2,
+      "ok": true
+    },
+    {
+      "name": "checkout",
+      "path": "/checkout",
+      "ttfb_ms": 3.4,
+      "size_kb": 44.8,
+      "ok": true
+    },
+    {
+      "name": "login",
+      "path": "/login",
+      "ttfb_ms": 2.6,
+      "size_kb": 48.2,
+      "ok": true
+    },
+    {
+      "name": "orders",
+      "path": "/orders",
+      "ttfb_ms": 2.9,
+      "size_kb": 44.6,
+      "ok": true
+    },
+    {
+      "name": "assistant",
+      "path": "/assistant",
+      "ttfb_ms": 2.2,
+      "size_kb": 49.0,
+      "ok": true
+    },
+    {
+      "name": "prescription",
+      "path": "/prescription",
+      "ttfb_ms": 2.3,
+      "size_kb": 46.6,
+      "ok": true
+    },
+    {
+      "name": "interactions",
+      "path": "/interactions",
+      "ttfb_ms": 2.2,
+      "size_kb": 48.4,
+      "ok": true
+    },
+    {
+      "name": "admin",
+      "path": "/admin",
+      "ttfb_ms": 2.1,
+      "size_kb": 45.3,
+      "ok": true
+    },
+    {
+      "name": "offline",
+      "path": "/offline",
+      "ttfb_ms": 2.1,
+      "size_kb": 46.3,
+      "ok": true
+    },
+    {
+      "name": "api products",
+      "path": "/api/products?limit=24",
+      "ttfb_ms": 9.8,
+      "size_kb": 29.6,
+      "ok": true
+    },
+    {
+      "name": "api categories",
+      "path": "/api/categories",
+      "ttfb_ms": 9.3,
+      "size_kb": 4.3,
+      "ok": true
+    },
+    {
+      "name": "sitemap",
+      "path": "/sitemap.xml",
+      "ttfb_ms": 7.6,
+      "size_kb": 96.7,
+      "ok": true
+    }
+  ],
+  "payload": {
+    "html_kb": 182.5,
+    "js_files": 14,
+    "js_kb": 909.0,
+    "js_gz_kb": 290.0,
+    "ssr_imgs": 26
+  },
+  "cache_headers": {
+    "images": "public, max-age=31536000, immutable",
+    "icons": "public, max-age=31536000, immutable",
+    "sw": "no-cache, no-store, must-revalidate",
+    "manifest": "public, max-age=3600"
+  },
+  "browser": {}
+}

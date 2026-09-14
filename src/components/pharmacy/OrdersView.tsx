@@ -12,24 +12,23 @@ import { ProductImage } from './ProductImage'
 import { go } from '@/lib/router'
 import { zoneById, ORDER_STATUSES } from '@/lib/zones'
 
-const STATUS_META: Record<string, { icon: any; classes: string }> = {
-  pending: { icon: Clock, classes: 'bg-amber-50 text-amber-700 border-amber-200' },
-  confirmed: { icon: CheckCircle2, classes: 'bg-sky-50 text-sky-700 border-sky-200' },
-  preparing: { icon: Loader2, classes: 'bg-violet-50 text-violet-700 border-violet-200' },
-  out_for_delivery: { icon: Truck, classes: 'bg-primary/10 text-primary border-primary/20' },
-  delivered: { icon: CheckCircle2, classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  cancelled: { icon: XCircle, classes: 'bg-red-50 text-red-600 border-red-200' },
+const STATUS_META: Record<string, { icon: any; classes: string; key: 'st_pending' | 'st_confirmed' | 'st_preparing' | 'st_out_for_delivery' | 'st_delivered' | 'st_cancelled' }> = {
+  pending: { icon: Clock, classes: 'bg-amber-50 text-amber-700 border-amber-200', key: 'st_pending' },
+  confirmed: { icon: CheckCircle2, classes: 'bg-sky-50 text-sky-700 border-sky-200', key: 'st_confirmed' },
+  preparing: { icon: Loader2, classes: 'bg-violet-50 text-violet-700 border-violet-200', key: 'st_preparing' },
+  out_for_delivery: { icon: Truck, classes: 'bg-primary/10 text-primary border-primary/20', key: 'st_out_for_delivery' },
+  delivered: { icon: CheckCircle2, classes: 'bg-emerald-50 text-emerald-700 border-emerald-200', key: 'st_delivered' },
+  cancelled: { icon: XCircle, classes: 'bg-red-50 text-red-600 border-red-200', key: 'st_cancelled' },
 }
 
 function StatusBadge({ status, lang }: { status: string; lang: string }) {
   const { t } = useLang()
   const meta = STATUS_META[status] || STATUS_META.pending
-  const key = `st_${status}` as const
   const Icon = meta.icon
   return (
     <Badge variant="outline" className={`gap-1.5 font-bold ${meta.classes}`}>
       <Icon className={`w-3.5 h-3.5 ${status === 'preparing' ? 'animate-spin' : ''}`} />
-      {t(key)}
+      {t(meta.key)}
     </Badge>
   )
 }

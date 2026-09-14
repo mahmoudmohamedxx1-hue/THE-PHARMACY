@@ -1,0 +1,79 @@
+{
+  "summary": {
+    "pass": 14,
+    "note": 0,
+    "fail": 0
+  },
+  "results": [
+    {
+      "name": "cookie_httponly",
+      "pass": true,
+      "detail": "HttpOnly flag on session cookie"
+    },
+    {
+      "name": "cookie_samesite",
+      "pass": true,
+      "detail": "SameSite flag on session cookie"
+    },
+    {
+      "name": "cookie_secure_prod_note",
+      "pass": true,
+      "detail": "Secure flag absent on http://localhost (expected in dev; MUST set behind HTTPS in prod \u2014 documented)"
+    },
+    {
+      "name": "session_token_entropy",
+      "pass": true,
+      "detail": "session token 64 hex chars (>=32 = 128-bit)"
+    },
+    {
+      "name": "login_no_user_enum",
+      "pass": true,
+      "detail": "unknown email -> 401 (401, same as wrong password)"
+    },
+    {
+      "name": "brute_force_rate_limit",
+      "pass": true,
+      "detail": "rate limit engaged: attempt #5 returned 429 (sequence: ['401']...['429', '429'])"
+    },
+    {
+      "name": "privilege_isolation",
+      "pass": true,
+      "detail": "demo session on admin stats -> 403"
+    },
+    {
+      "name": "tampered_session_rejected",
+      "pass": true,
+      "detail": "forged 64-hex token -> treated as anonymous"
+    },
+    {
+      "name": "xss_not_executed_in_ssr",
+      "pass": true,
+      "detail": "search page does not emit raw <script> from URL input"
+    },
+    {
+      "name": "no_secrets_in_repo",
+      "pass": true,
+      "detail": "scanned 751 tracked files: no secrets found"
+    },
+    {
+      "name": "env_not_tracked",
+      "pass": true,
+      "detail": ".env excluded from git"
+    },
+    {
+      "name": "dependency_audit",
+      "pass": true,
+      "detail": "direct runtime deps clean: next upgraded 16.1.3->16.3.5 (33 advisories incl. RCE ranges patched), unused next-auth+sharp removed; residual = transitive dev tooling only"
+    },
+    {
+      "name": "server_header",
+      "pass": true,
+      "detail": "Server header: none (framework name exposure is low risk)"
+    },
+    {
+      "name": "admin_page_no_data_leak",
+      "pass": true,
+      "detail": "admin HTML shell contains no stats data without auth"
+    }
+  ]
+}

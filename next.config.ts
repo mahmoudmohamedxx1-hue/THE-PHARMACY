@@ -6,9 +6,6 @@ import type { NextConfig } from "next";
 // builds its own output and simply ignores the standalone folder.
 const nextConfig: NextConfig = {
   output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   reactStrictMode: false,
   // Allow the preview proxy origin to access the dev server without warnings.
   allowedDevOrigins: ["*.space-z.ai", "localhost", "127.0.0.1"],
