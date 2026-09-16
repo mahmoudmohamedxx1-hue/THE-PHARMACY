@@ -69,7 +69,11 @@ export function trackEvent(
       value: opts.value,
       currency: "EGP",
     });
-    // First-party store — sendBeacon survives page navigation
+    // First-party store — sendBeacon survives page navigation.
+    // NOTE: 'purchase' is recorded server-side by /api/orders (source of
+    // truth) — sending it here too would double-count internally, so the
+    // client only mirrors it to GA4 / Pixel.
+    if (type === "purchase") return;
     const body = JSON.stringify({
       type,
       path: opts.path,
