@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Lang } from '@/lib/i18n'
+import { trackEvent } from '@/lib/track'
 
 export interface CartItem {
   productId: string
@@ -31,7 +32,9 @@ export const useCart = create<CartState>()(
     (set) => ({
       items: [],
       isOpen: false,
-      add: (item, qty = 1) =>
+      add: (item, qty = 1) => {
+        // commerce analytics — fires wherever items are added (card / product page / cart)
+        trackEvent('add_to_cart', { productId: item.slug, value: item.price * qty, name: item.nameEn })
         set((s) => {
           const existing = s.items.find((i) => i.productId === item.productId)
           if (existing) {
@@ -44,7 +47,8 @@ export const useCart = create<CartState>()(
             }
           }
           return { items: [...s.items, { ...item, qty: Math.min(qty, Math.max(1, item.stock), 20) }] }
-        }),
+        })
+      },
       remove: (productId) => set((s) => ({ items: s.items.filter((i) => i.productId !== productId) })),
       setQty: (productId, qty) =>
         set((s) => ({
