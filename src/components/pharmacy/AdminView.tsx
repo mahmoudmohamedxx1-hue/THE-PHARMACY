@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LayoutDashboard, Package, ShoppingCart, Users, FileText, AlertTriangle, TrendingUp, Search, Loader2, Save, Pill, IndianRupee } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, FileText, AlertTriangle, TrendingUp, Search, Loader2, Save, Pill, IndianRupee, Download, Filter } from 'lucide-react'
 import { useLang } from './LangContext'
 import { go } from '@/lib/router'
 import { fmtPrice } from './ProductCard'
@@ -21,6 +21,7 @@ export function AdminView() {
   const qc = useQueryClient()
   const { toast } = useToast()
   const [productSearch, setProductSearch] = useState('')
+  const [lowOnly, setLowOnly] = useState(false)
   const [editing, setEditing] = useState<Record<string, { price: string; stock: string }>>({})
 
   const stats = useQuery({
@@ -35,9 +36,9 @@ export function AdminView() {
   })
 
   const adminProducts = useQuery({
-    queryKey: ['admin-products', productSearch],
+    queryKey: ['admin-products', productSearch, lowOnly],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/products?q=${encodeURIComponent(productSearch)}`)
+      const res = await fetch(`/api/admin/products?q=${encodeURIComponent(productSearch)}&low=${lowOnly ? 1 : 0}`)
       return res.json()
     },
     enabled: !!user?.isAdmin,
@@ -148,6 +149,84 @@ export function AdminView() {
         </Card>
       )}
 
+      {/* analytics — first-party funnel (last 30 days) */}
+      {(() => {
+        const a = stats.data?.analytics
+        if (!a) return null
+        const f = a.funnel || {}
+        const stages = [
+          { key: 'pageViews', label: t('a_page_views') },
+          { key: 'itemViews', label: t('a_item_views') },
+          { key: 'addToCart', label: t('a_add_to_cart') },
+          { key: 'beginCheckout', label: t('a_begin_checkout') },
+          { key: 'purchases', label: t('a_purchases') },
+        ] as const
+        const max = Math.max(1, ...stages.map((st) => f[st.key] || 0))
+        const hasData = stages.some((st) => (f[st.key] || 0) > 0)
+        return (
+          <Card className="p-5 flex flex-col gap-5">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="font-black flex items-center gap-2"><TrendingUp className="w-4.5 h-4.5 text-primary" /> {t('a_analytics')}</h2>
+              {hasData && (
+                <Badge variant="outline" className="font-bold bg-primary/5">
+                  {(((f.purchases || 0) / Math.max(1, f.pageViews || 1)) * 100).toFixed(1)}% {t('a_conversion')}
+                </Badge>
+              )}
+            </div>
+            {!hasData ? (
+              <p className="text-sm text-muted-foreground">{t('a_no_analytics')}</p>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* funnel bars */}
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t('a_funnel')}</h3>
+                  {stages.map((st) => {
+                    const v = f[st.key] || 0
+                    return (
+                      <div key={st.key} className="flex items-center gap-3">
+                        <span className="text-xs font-semibold w-36 shrink-0 line-clamp-1">{st.label}</span>
+                        <div className="flex-1 h-7 rounded-lg bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-lg bg-gradient-to-l from-primary to-teal-400 transition-all"
+                            style={{ width: `${Math.max(2, (v / max) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-black w-10 text-end">{v}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+                {/* top pages + most viewed */}
+                <div className="flex flex-col gap-5">
+                  {(a.topPages?.length > 0) && (
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t('a_top_pages')}</h3>
+                      {a.topPages.map((p: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="font-mono text-xs line-clamp-1" dir="ltr">{p.path}</span>
+                          <Badge variant="secondary" className="font-bold shrink-0 ms-3">{p.views}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {(a.topViewed?.length > 0) && (
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t('a_most_viewed')}</h3>
+                      {a.topViewed.map((p: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="font-medium line-clamp-1">{lang === 'ar' ? p.nameAr : p.nameEn}</span>
+                          <Badge variant="secondary" className="font-bold shrink-0 ms-3">{p.views}×</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </Card>
+        )
+      })()}
+
       <Tabs defaultValue="orders">
         <TabsList className="rounded-xl h-11">
           <TabsTrigger value="orders" className="rounded-lg font-semibold gap-1.5"><ShoppingCart className="w-4 h-4" /> {t('a_manage_orders')}</TabsTrigger>
@@ -158,6 +237,14 @@ export function AdminView() {
         {/* orders tab */}
         <TabsContent value="orders" className="mt-4">
           <Card className="overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b">
+              <span className="text-sm font-bold text-muted-foreground">{orders.length} / {adminOrders.data?.total ?? 0}</span>
+              <Button asChild variant="outline" size="sm" className="rounded-lg font-bold gap-1.5">
+                <a href="/api/admin/orders/export" download>
+                  <Download className="w-4 h-4" /> {t('a_export_csv')}
+                </a>
+              </Button>
+            </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -205,14 +292,30 @@ export function AdminView() {
 
         {/* products tab */}
         <TabsContent value="products" className="mt-4 flex flex-col gap-4">
-          <div className="relative max-w-sm">
-            <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={productSearch}
-              onChange={(e) => setProductSearch(e.target.value)}
-              placeholder={t('a_search_products')}
-              className="ps-10 rounded-xl h-10"
-            />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="relative flex-1 min-w-48 max-w-sm">
+              <Search className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder={t('a_search_products')}
+                className="ps-10 rounded-xl h-10"
+              />
+            </div>
+            <Button
+              variant={lowOnly ? 'default' : 'outline'}
+              size="sm"
+              className="rounded-lg font-bold gap-1.5 h-10"
+              onClick={() => setLowOnly((v) => !v)}
+            >
+              <Filter className="w-4 h-4" />
+              {lowOnly ? t('a_all') : t('a_low_stock_only')}
+            </Button>
+            <Button asChild variant="outline" size="sm" className="rounded-lg font-bold gap-1.5 h-10">
+              <a href="/api/admin/products/export" download>
+                <Download className="w-4 h-4" /> {t('a_export_csv')}
+              </a>
+            </Button>
           </div>
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">

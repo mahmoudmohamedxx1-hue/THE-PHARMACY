@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono, Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/pharmacy/Providers";
 import { SiteChrome } from "@/components/pharmacy/SiteChrome";
+import { PageViewTracker } from "@/components/pharmacy/PageViewTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +24,11 @@ const cairo = Cairo({
 });
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+// Optional analytics — scripts only load when the IDs are configured at
+// build time. Without env IDs this renders nothing (zero network cost).
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 // iOS splash screens (key modern iPhone / iPad sizes)
 const SPLASH: Array<[string, string]> = [
@@ -90,8 +97,32 @@ export default function RootLayout({
       >
         <Providers>
           <SiteChrome>{children}</SiteChrome>
+          <PageViewTracker />
         </Providers>
         <Toaster />
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { send_page_view: false });`}
+            </Script>
+          </>
+        )}
+        {PIXEL_ID && (
+          <Script id="meta-pixel" strategy="afterInteractive">
+            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+              n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+              document,'script','https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${PIXEL_ID}');`}
+          </Script>
+        )}
       </body>
     </html>
   );

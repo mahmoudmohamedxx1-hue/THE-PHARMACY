@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { ORDER_STATUSES } from '@/lib/zones'
+import { sendOrderStatusUpdate } from '@/lib/notify'
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()
@@ -37,6 +38,16 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'invalid' }, { status: 400 })
     }
     const order = await db.order.update({ where: { id }, data: { status } })
+    // notify the customer about the status change (no-op without RESEND_API_KEY)
+    if (order.userId) {
+      const full = await db.order.findUnique({
+        where: { id: order.id },
+        include: { items: true, user: { select: { email: true } } },
+      })
+      if (full?.user?.email) {
+        sendOrderStatusUpdate(full, full.user.email).catch(() => {})
+      }
+    }
     return NextResponse.json({ order })
   } catch (e: any) {
     // Prisma P2025 = record to update not found -> proper 404, not a 500

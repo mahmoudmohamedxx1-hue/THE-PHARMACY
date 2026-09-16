@@ -68,6 +68,7 @@ model Product {
   isFeatured           Boolean     @default(false)
   createdAt            DateTime    @default(now())
   orderItems           OrderItem[]
+  analyticsEvents      AnalyticsEvent[]
 }
 
 model Order {
@@ -112,4 +113,20 @@ model Prescription {
   phone            String   @default("")
   notes            String   @default("")
   createdAt        DateTime @default(now())
+}
+
+// First-party analytics: page views + commerce funnel events.
+// Never contains PII — sessionId is an anonymous localStorage id.
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String   // page_view | view_item | add_to_cart | begin_checkout | purchase
+  path      String   @default("")
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  sessionId String   @default("")
+  meta      String   @default("") // JSON blob: { value, orderId, ... }
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([path, createdAt])
 }

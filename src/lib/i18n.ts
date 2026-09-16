@@ -225,6 +225,22 @@ export const T = {
   a_featured: { en: 'Featured', ar: 'مميز' },
   admin_forbidden: { en: 'Admin access required', ar: 'مطلوب صلاحية إدارة' },
 
+  // admin analytics + exports
+  a_analytics: { en: 'Analytics — last 30 days', ar: 'التحليلات — آخر 30 يوماً' },
+  a_funnel: { en: 'Conversion funnel', ar: 'قمع التحويل' },
+  a_page_views: { en: 'Page views', ar: 'مشاهدات الصفحات' },
+  a_item_views: { en: 'Product page views', ar: 'مشاهدات صفحات المنتجات' },
+  a_add_to_cart: { en: 'Added to cart', ar: 'أُضيف إلى السلة' },
+  a_begin_checkout: { en: 'Started checkout', ar: 'بدأ إتمام الطلب' },
+  a_purchases: { en: 'Purchases', ar: 'عمليات الشراء' },
+  a_top_pages: { en: 'Top pages', ar: 'أكثر الصفحات زيارة' },
+  a_most_viewed: { en: 'Most viewed products', ar: 'المنتجات الأكثر مشاهدة' },
+  a_export_csv: { en: 'Export CSV', ar: 'تصدير CSV' },
+  a_low_stock_only: { en: 'Low stock only', ar: 'مخزون منخفض فقط' },
+  a_all: { en: 'All', ar: 'الكل' },
+  a_conversion: { en: 'conversion', ar: 'تحويل' },
+  a_no_analytics: { en: 'No analytics data yet — it collects as visitors browse.', ar: 'لا توجد بيانات تحليلات بعد — تُجمع أثناء زيارة العملاء.' },
+
   // footer
   about_us: { en: 'About The Pharmacy', ar: 'عن ذا فارميسي' },
   footer_about: {

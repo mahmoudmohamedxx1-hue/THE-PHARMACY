@@ -8,11 +8,14 @@ export async function GET(req: NextRequest) {
   try {
     const sp = req.nextUrl.searchParams
     const q = (sp.get('q') || '').trim()
+    const low = sp.get('low') === '1' // low-stock-only view
     const page = Math.max(1, Number(sp.get('page') || 1))
     const limit = 20
-    const where = q ? {
-      OR: [{ nameEn: { contains: q } }, { nameAr: { contains: q } }, { brand: { contains: q } }],
-    } : {}
+    const where: any = {}
+    if (low) where.stock = { lte: 10 }
+    if (q) {
+      where.OR = [{ nameEn: { contains: q } }, { nameAr: { contains: q } }, { brand: { contains: q } }]
+    }
     const [items, total] = await Promise.all([
       db.product.findMany({
         where, orderBy: { createdAt: 'desc' },

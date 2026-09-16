@@ -18,6 +18,17 @@ export function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
+/** Purge expired sessions so the table cannot grow unbounded.
+ *  Called on every login + occasionally on session reads. */
+export async function purgeExpiredSessions(): Promise<number> {
+  try {
+    const res = await db.session.deleteMany({ where: { expiresAt: { lt: new Date() } } })
+    return res.count
+  } catch {
+    return 0
+  }
+}
+
 export async function createSession(userId: string) {
   const token = `${randomUUID()}${randomUUID()}`.replace(/-/g, '')
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
@@ -25,7 +36,11 @@ export async function createSession(userId: string) {
   const jar = await cookies()
   jar.set('tp_session', token, {
     httpOnly: true, sameSite: 'lax', path: '/', expires: expiresAt,
+    // Send the cookie over HTTPS only in production (Vercel / custom domain).
+    secure: process.env.NODE_ENV === 'production',
   })
+  // housekeeping: drop expired sessions on every login
+  purgeExpiredSessions()
   return token
 }
 
@@ -44,6 +59,13 @@ export async function getCurrentUser() {
     where: { token },
     include: { user: true },
   })
-  if (!session || session.expiresAt < new Date()) return null
+  if (!session) return null
+  if (session.expiresAt < new Date()) {
+    // lazily delete the expired session so it cannot be replayed
+    db.session.deleteMany({ where: { token } }).catch(() => {})
+    return null
+  }
+  // opportunistic full cleanup on ~2% of authenticated requests
+  if (Math.random() < 0.02) purgeExpiredSessions()
   return session.user
 }
