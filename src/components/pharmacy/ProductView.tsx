@@ -16,6 +16,7 @@ import { useCart } from '@/lib/store'
 import { useRecent } from '@/lib/store'
 import { useToast } from '@/hooks/use-toast'
 import { useEffect } from 'react'
+import { trackEvent } from '@/lib/track'
 
 export function ProductView({ slug, initial }: { slug: string; initial?: { product: any; related: any[] } }) {
   const { lang, t } = useLang()
@@ -38,7 +39,16 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
   }
 
   useEffect(() => {
-    if (data?.product) pushRecent(data.product.id)
+    if (data?.product) {
+      pushRecent(data.product.id)
+      // commerce analytics: product page view
+      trackEvent('view_item', {
+        productId: data.product.slug,
+        path: `/product/${data.product.slug}`,
+        value: data.product.price,
+        name: data.product.nameEn,
+      })
+    }
   }, [data?.product?.id, pushRecent])
 
   if (isLoading) {
