@@ -46,7 +46,7 @@ export function CartDrawer() {
               {items.map((i) => (
                 <div key={i.productId} className="flex gap-3 p-3 rounded-2xl border bg-card hover:border-primary/30 transition-colors">
                   <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="shrink-0" aria-label="view product">
-                    <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-20 h-20 rounded-xl border-border/50" rounded="rounded-xl" />
+                    <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-20 h-20 rounded-xl border-border/50" rounded="rounded-xl" sizes="80px" />
                   </button>
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
                     <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="text-start">

@@ -15,6 +15,7 @@ import { ProductImage } from './ProductImage'
 import { fmtPrice } from './ProductCard'
 import { go } from '@/lib/router'
 import { ZONES, FREE_DELIVERY_THRESHOLD } from '@/lib/zones'
+import { trackEvent } from '@/lib/track'
 
 export function CheckoutView() {
   const { lang, t, user } = useLang()
@@ -54,6 +55,9 @@ export function CheckoutView() {
     const cleanPhone = phone.replace(/[\s-]/g, '')
     if (!/^(\+?2?01)[0-9]{9}$/.test(cleanPhone)) { setError(t('phone_hint')); return }
 
+    // commerce analytics: user is committing to the order
+    trackEvent('begin_checkout', { path: '/checkout', value: total })
+
     setLoading(true)
     try {
       const res = await fetch('/api/orders', {
@@ -72,6 +76,13 @@ export function CheckoutView() {
         return
       }
       clear()
+      // purchase mirror to GA4 / Meta Pixel (first-party event is recorded
+      // server-side by /api/orders — no double count internally)
+      trackEvent('purchase', {
+        path: '/checkout',
+        value: data.order?.total ?? total,
+        orderId: data.order?.orderNumber,
+      })
       go(`/success/${data.order.id}`)
     } catch {
       setError(t('error_generic'))
@@ -175,7 +186,7 @@ export function CheckoutView() {
             {items.map((i) => (
               <div key={i.productId} className="flex items-center justify-between gap-3 text-sm">
                 <span className="flex items-center gap-2.5 min-w-0">
-                  <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-11 h-11 shrink-0 rounded-lg border-border/50" rounded="rounded-lg" />
+                  <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-11 h-11 shrink-0 rounded-lg border-border/50" rounded="rounded-lg" sizes="44px" />
                   <span className="min-w-0">
                     <span className="block font-medium line-clamp-1">{lang === 'ar' ? i.nameAr : i.nameEn}</span>
                     <span className="text-xs text-muted-foreground">× {i.qty}</span>

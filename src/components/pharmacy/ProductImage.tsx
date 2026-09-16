@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { productArt } from '@/lib/art'
 import { Pill, Zap, Sparkles, Waves, Baby, Droplets, Palette, Stethoscope, Heart, PawPrint } from 'lucide-react'
 
@@ -40,17 +41,27 @@ function ArtFallback({ slug, category, brand }: { slug: string; category: string
   )
 }
 
+/**
+ * Product photo with next/image (AVIF/WebP on the fly via sharp).
+ * - `eager`  -> above-the-fold: priority (preloaded, no fade gate)
+ * - `sizes`  -> layout hint so the browser picks the smallest device size
+ *               that matches the rendered box (default suits grid cards;
+ *               pass smaller values for cart rows / thumbnails)
+ * Falls back to generated brand art when no photo or on load error.
+ */
 export function ProductImage({
   slug, category, brand, imageUrl, className = '', rounded = 'rounded-2xl', zoom = false, alt, eager = false,
+  sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px',
 }: {
   slug: string; category: string; brand: string; imageUrl?: string | null
   className?: string; rounded?: string; zoom?: boolean; alt?: string; eager?: boolean
+  sizes?: string
 }) {
   const [failed, setFailed] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const showPhoto = !!imageUrl && !failed
-  // Above-fold (eager) images render visible immediately — no fade-in gate,
-  // so content paints with the server HTML even before hydration runs.
+  // Above-fold (eager/priority) images render visible immediately — no
+  // fade-in gate, so content paints with the server HTML pre-hydration.
   const visible = eager || loaded
 
   return (
@@ -63,17 +74,15 @@ export function ProductImage({
       {showPhoto ? (
         <>
           {!visible && <div className="absolute inset-0 bg-muted/40 animate-pulse" />}
-          <img
+          <Image
             src={imageUrl!}
             alt={alt || ''}
-            width={600}
-            height={600}
-            loading={eager ? 'eager' : 'lazy'}
-            fetchPriority={eager ? 'high' : 'auto'}
-            decoding={eager ? 'sync' : 'async'}
+            fill
+            sizes={sizes}
+            priority={eager}
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
-            className={`relative z-10 w-full h-full object-contain p-[7%] transition-all duration-500 ${zoom ? 'group-hover:scale-[1.06]' : ''} ${visible ? "opacity-100 blur-0" : "opacity-0 blur-sm"}`}
+            className={`z-10 object-contain p-[7%] transition-all duration-500 ${zoom ? 'group-hover:scale-[1.06]' : ''} ${visible ? "opacity-100 blur-0" : "opacity-0 blur-sm"}`}
           />
         </>
       ) : (

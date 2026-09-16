@@ -119,7 +119,7 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
                 style={zoomStyle}
               />
             ) : (
-              <ProductImage slug={p.slug} category={p.category.slug} brand={p.brand} imageUrl={p.imageUrl} alt={name} className="relative z-10 w-full aspect-square" rounded="rounded-3xl" />
+              <ProductImage slug={p.slug} category={p.category.slug} brand={p.brand} imageUrl={p.imageUrl} alt={name} className="relative z-10 w-full aspect-square" rounded="rounded-3xl" sizes="(max-width: 1024px) 92vw, 45vw" />
             )}
             {discount > 0 && (
               <Badge className="absolute top-4 start-4 z-20 bg-red-500 hover:bg-red-500 text-sm font-black px-3 py-1.5 shadow-md">-{discount}% {t('off')}</Badge>

@@ -98,7 +98,7 @@ export function OrdersView() {
                   {o.items.map((it: any) => (
                     <div key={it.id} className="flex items-center justify-between text-sm gap-3">
                       <span className="flex items-center gap-2.5 min-w-0">
-                        <ProductImage slug={it.product?.slug || it.id} category="pill" brand="" imageUrl={it.product?.imageUrl} alt={lang === 'ar' ? it.nameAr : it.nameEn} className="w-10 h-10 shrink-0 rounded-lg border-border/50" rounded="rounded-lg" />
+                        <ProductImage slug={it.product?.slug || it.id} category="pill" brand="" imageUrl={it.product?.imageUrl} alt={lang === 'ar' ? it.nameAr : it.nameEn} className="w-10 h-10 shrink-0 rounded-lg border-border/50" rounded="rounded-lg" sizes="40px" />
                         <span className="font-medium line-clamp-1">{lang === 'ar' ? it.nameAr : it.nameEn} × {it.quantity}</span>
                       </span>
                       <span className="font-bold shrink-0">{fmtPrice(it.price * it.quantity, lang)}</span>

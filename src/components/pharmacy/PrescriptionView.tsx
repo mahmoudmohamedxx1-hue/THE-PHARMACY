@@ -252,7 +252,7 @@ export function PrescriptionView() {
               <div className="grid sm:grid-cols-2 gap-3.5">
                 {result.matches.map((m) => (
                   <div key={m.productId} className="flex gap-3.5 p-3.5 rounded-2xl border hover:border-primary/40 transition-colors">
-                    <ProductImage slug={m.slug} category="medications" brand={m.brand} imageUrl={m.imageUrl} alt={lang === 'ar' ? m.nameAr : m.nameEn} className="w-20 h-20 shrink-0 rounded-xl border-border/50" rounded="rounded-xl" />
+                    <ProductImage slug={m.slug} category="medications" brand={m.brand} imageUrl={m.imageUrl} alt={lang === 'ar' ? m.nameAr : m.nameEn} className="w-20 h-20 shrink-0 rounded-xl border-border/50" rounded="rounded-xl" sizes="80px" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <button onClick={() => go(`/p/${m.slug}`)} className="text-start">
                         <p className="text-sm font-bold line-clamp-2 hover:text-primary transition-colors">{lang === 'ar' ? m.nameAr : m.nameEn}</p>
