@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Bun for installs/tests + Node for the Next.js build
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Unit tests (bun test)
+        run: bun test tests/unit
+
+      - name: Build (Next.js production)
+        run: bunx next build
+
+      # E2E runs only locally / on a self-hosted runner with a server;
+      # on GitHub-hosted runners SQLite writes + AI keys are unavailable.

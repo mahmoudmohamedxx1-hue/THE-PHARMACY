@@ -16,6 +16,7 @@ import { fmtPrice } from './ProductCard'
 import { go } from '@/lib/router'
 import { ZONES, FREE_DELIVERY_THRESHOLD } from '@/lib/zones'
 import { trackEvent } from '@/lib/track'
+import { EGYPT_PHONE_RE } from '@/lib/order-utils'
 
 export function CheckoutView() {
   const { lang, t, user } = useLang()
@@ -53,7 +54,7 @@ export function CheckoutView() {
     if (!zone) { setError(lang === 'ar' ? 'اختر منطقة التوصيل' : 'Select a delivery zone'); return }
     if (address.trim().length < 8) { setError(lang === 'ar' ? 'أدخل عنواناً كاملاً' : 'Enter a complete address'); return }
     const cleanPhone = phone.replace(/[\s-]/g, '')
-    if (!/^(\+?2?01)[0-9]{9}$/.test(cleanPhone)) { setError(t('phone_hint')); return }
+    if (!EGYPT_PHONE_RE.test(cleanPhone)) { setError(t('phone_hint')); return }
 
     // commerce analytics: user is committing to the order
     trackEvent('begin_checkout', { path: '/checkout', value: total })
@@ -83,7 +84,10 @@ export function CheckoutView() {
         value: data.order?.total ?? total,
         orderId: data.order?.orderNumber,
       })
-      go(`/success/${data.order.id}`)
+      // Navigate by orderNumber (not the cuid): the order API lets guests
+      // view their order via the random order number only — using the cuid
+      // made the success page 403 for guest checkouts.
+      go(`/success/${data.order.orderNumber}`)
     } catch {
       setError(t('error_generic'))
     } finally {

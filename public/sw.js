@@ -5,7 +5,7 @@
  *   - Product images:       network-first  -> cache fallback
  *   - API GETs:             network-first  -> cache fallback (auth excluded)
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const C = {
   shell: 'tp-shell-' + VERSION,
   assets: 'tp-assets-' + VERSION,
@@ -107,8 +107,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3) Product images -> network-first with cache fallback (fresh when online)
-  if (url.pathname.startsWith('/images/')) {
+  // 3) Product images (originals + /_next/image optimized variants)
+  //    -> network-first with cache fallback (fresh when online)
+  if (url.pathname.startsWith('/images/') || url.pathname.startsWith('/_next/image')) {
     event.respondWith(networkFirst(request, C.assets));
     return;
   }

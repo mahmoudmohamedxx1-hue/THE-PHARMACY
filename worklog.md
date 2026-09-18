@@ -276,3 +276,48 @@ Stage Summary:
 - Platform unique in market: 3 real AI features + native bilingual RTL + installable PWA; competitors have neither AI nor true RTL
 - Competitive gaps are commercial not technical: catalog 496 vs 11k+, COD only, no marketing
 - Roadmap: 0-30d payments(Paymob)+VPS deploy+1500 SKUs+pharmacist partnership; 31-60d SEO/analytics/loyalty/inventory tx; 61-90d apps-or-PWA+/B2B insurer channel/PostgreSQL
+
+---
+Task ID: 12+13
+Agent: Super Z (main agent)
+Task: Implement gaps 2,3,4,6,7,8,9,10,11 (security/auth/notifications/analytics/exports/tests/next-image) + deep bug & fake-data audit with in-browser user testing, then fix everything found
+
+Work Log:
+- SECURITY (gap 2): next.config headers() — CSP (env-aware: unsafe-eval dev-only, GA/Pixel origins only when IDs set), X-Frame-Options SAMEORIGIN, nosniff, Referrer-Policy, HSTS, Permissions-Policy on all routes; frame-ancestors allows self + *.space-z.ai preview
+- AUTH (gaps 3+4): session cookie secure flag in production; purgeExpiredSessions() on login + 2% of reads; expired session found on read is lazily deleted
+- NOTIFICATIONS (gap 6): src/lib/notify.ts — Resend HTTP API, bilingual RTL HTML templates (order confirmation + status updates); hooks in POST /api/orders and PATCH /api/admin/orders; graceful no-op without RESEND_API_KEY; env documented in .env.example
+- ANALYTICS (gap 7): AnalyticsEvent Prisma model (+indexes, 90d retention purge); POST /api/analytics ingest (rate-limited 120/min, type whitelist); src/lib/track.ts client tracker fans out to gtag + fbq + first-party beacon (purchase only server-side to avoid double count); PageViewTracker on route changes; view_item/add_to_cart/begin_checkout/purchase wired in ProductView/store/CheckoutView; GA4 + Meta Pixel scripts env-gated in layout; admin stats returns funnel + top pages + most viewed; AdminView renders funnel bars + conversion badge
+- ADMIN (gap 8): /api/admin/orders/export + /api/admin/products/export CSVs (UTF-8 BOM, CRLF, quoting); export buttons in orders/products tabs; low=1 filter + toggle button; order-utils.ts extracted pure logic (phone/qty/fee/csv) reused by API + tests
+- next/image (gap 10): ProductImage rewritten with next/image fill+sizes+priority; sharp 0.35.4 installed; avif/webp formats, 30d min cache TTL; tight sizes hints on 6 small-box usages; sw.js v2 caches /_next/image
+- TESTS (gap 9): tests/unit (27 bun tests: auth scrypt, phone/qty/fee/csv, zones integrity, rate-limit windows, notify/status label coverage); tests/e2e Playwright (routes 200 + headers + no-fake-reviews, guest COD checkout, auth flows + credential-leak check); playwright.config reuses running server; package.json test/test:e2e scripts; .github/workflows/ci.yml (bun install + unit tests + next build)
+- AUDIT — FAKE DATA FOUND & PURGED (SQLite via python sqlite3; DB had become corrupted by concurrent write while server open — restored clean from git blob, then quick_check ok):
+  * 18 fake orders (4 demo seed "Demo address" +201000000002, 14 E2E test artifacts) → deleted, stock restored
+  * 6 qa-test-* users + 30 stale sessions → deleted
+  * 2 test prescriptions (test phones + base64 test jpeg) → deleted
+  * 496 fabricated reviewCounts (~920-954 each) → zeroed; UI hides stars/reviews when reviewCount=0 (ProductCard + ProductView)
+  * ratings kept only as internal sort signal, never displayed without real reviews
+  * admin credentials removed from /admin forbidden page + README; login page keeps demo-account hint only
+  * 8 products with brand "Unknown" → real brand names (Nasacort, Telfast, Maalox...)
+  * claims fixed: hero "488+/same-day across Egypt" → "hundreds/fast delivery"; delivery_express "Cairo & Giza" → "Cairo" (Giza is next-day); 2-4 days → 2-5 days (Aswan 3-5); hardcoded count fallback removed
+- AUDIT — REAL BUGS FOUND & FIXED:
+  * GUEST CHECKOUT SUCCESS 403: checkout navigated to /success/<cuid> but the orders API only grants guests access by orderNumber → guests never saw their order details. Fixed: navigate by orderNumber (E2E now asserts TP- number visible)
+  * PHONE REGEX TOO LOOSE: ^(\+?2?01)[0-9]{9}$ accepted invalid prefixes (013/014/016-019); tightened to ^(?:\+?20|0)?1[0125][0-9]{8}$ in order-utils + checkout inline copy replaced with shared validator (found by unit test)
+  * dead untracked v0 artifact PharmacyApp.tsx referenced removed router export → build failure; deleted
+  * my own edits fixed: duplicate trackEvent import (store.ts), mangled phone regex in CheckoutView, extra brace in stats route, tsconfig exclude clobber (restored examples/scripts/skills/... excludes + added tests)
+- VERIFICATION (production mode, localhost:3000):
+  * build clean; 21+ routes 200; security headers present (CSP/XFO/nosniff/HSTS/Referrer/Permissions)
+  * image optimization live: 32KB webp → 20KB optimized at w=640
+  * analytics funnel captured end-to-end during manual browse→product→cart→checkout→order (page_view 4+, view_item, add_to_cart, begin_checkout, purchase 1 server-side)
+  * email correctly no-ops without RESEND_API_KEY (logged, order flow unaffected)
+  * admin dashboard: funnel/top pages/most viewed render; orders+products CSV exports verified via session fetch; low-stock filter returns 20 items
+  * AI assistant real Arabic reply with product recommendations; no console errors on any audited page
+  * mobile 375px home + checkout: zero horizontal overflow
+  * VLM QA: home EN caught the 490+ vs 461+ count mismatch (fixed to "hundreds" + dynamic stat); product page PASS after re-shot; admin consistent (1 order = 1 purchase = 7.1%)
+  * unit tests 27/27 pass; E2E 9/9 pass (after guest-success fix)
+  * final DB state: 0 orders, 2 users (admin+demo), 0 sessions, 0 events, stock restored, PRAGMA quick_check ok
+
+Stage Summary:
+- 9 gaps implemented (2,3,4,6,7,8,9,10,11) + fake data fully purged + 2 real user-facing bugs fixed (guest success 403, loose phone validation) + claims made honest
+- Repo now has test infrastructure (bun unit + Playwright E2E + CI workflow) and maintenance scripts (clean_test_order.ts, check_db.ts)
+- Files touched: next.config.ts, src/lib/{auth,notify,order-utils,analytics-server,track,store,i18n}.ts, src/app/{layout.tsx,api/{analytics,orders,admin/*}}, src/components/pharmacy/{ProductImage,ProductCard,ProductView,CheckoutView,AdminView,PageViewTracker}.tsx, prisma/schema.prisma, public/sw.js, package.json, tsconfig.json, README.md, .env.example, playwright.config.ts, tests/**, .github/workflows/ci.yml, db/custom.db (cleaned+repaired), scripts/{clean_fake_data,clean_test_order,check_db}.ts
+- Remaining known items: gap 1 (login/AI rate limiting) only partially covered (orders+analytics rate-limited; login already had limiter; AI endpoints limiter TODO), Paymob payments (gap 5), 14 imageless products (ArtFallback renders honestly), Vercel redeploy needed

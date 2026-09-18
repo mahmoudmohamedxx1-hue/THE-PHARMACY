@@ -89,7 +89,7 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
             </div>
             <div className="flex items-center gap-5 pt-4 text-sm">
               <span className="flex flex-col">
-                <span className="text-2xl font-black text-primary">{totalCount ? `${totalCount}+` : '488+'}</span>
+                <span className="text-2xl font-black text-primary">{totalCount ? `${totalCount}+` : '460+'}</span>
                 <span className="text-xs text-muted-foreground">{lang === 'ar' ? 'منتج أصلي' : 'genuine products'}</span>
               </span>
               <span className="w-px h-8 bg-border" />

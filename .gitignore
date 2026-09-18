@@ -71,3 +71,8 @@ upload/
 tool-results/
 examples/
 tests/
+
+# test + repair artifacts
+test-results/
+playwright-report/
+db/backup/

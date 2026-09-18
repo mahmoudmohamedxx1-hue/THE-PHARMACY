@@ -152,13 +152,18 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{name}</h1>
 
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className={`w-4 h-4 ${i < Math.round(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
-              ))}
-            </span>
-            <span className="text-sm font-bold">{p.rating.toFixed(1)}</span>
-            <span className="text-sm text-muted-foreground">({p.reviewCount} {t('reviews')})</span>
+            {/* honest social proof: ratings/reviews only show when real reviews exist */}
+            {p.reviewCount > 0 && (
+              <>
+                <span className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`w-4 h-4 ${i < Math.round(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
+                  ))}
+                </span>
+                <span className="text-sm font-bold">{p.rating.toFixed(1)}</span>
+                <span className="text-sm text-muted-foreground">({p.reviewCount} {t('reviews')})</span>
+              </>
+            )}
             {p.volume && <Badge variant="secondary" className="font-semibold"><Package className="w-3 h-3 me-1" />{p.volume}</Badge>}
           </div>
 

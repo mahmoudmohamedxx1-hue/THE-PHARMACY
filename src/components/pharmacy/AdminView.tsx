@@ -60,7 +60,6 @@ export function AdminView() {
           <AlertTriangle className="w-7 h-7" />
         </span>
         <p className="font-bold text-lg">{t('admin_forbidden')}</p>
-        <p className="text-sm text-muted-foreground font-mono">admin@thepharmacy.com / Admin@2026</p>
         <Button onClick={() => go('/login')} variant="outline" className="rounded-xl font-bold">{t('login')}</Button>
       </div>
     )

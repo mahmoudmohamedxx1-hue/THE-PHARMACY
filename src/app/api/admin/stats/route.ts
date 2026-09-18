@@ -36,7 +36,7 @@ export async function GET() {
     // resolve product names for the most-viewed list
     const viewedIds = topViewedAgg.map((v) => v.productId).filter(Boolean) as string[]
     const viewedProducts = viewedIds.length
-      ? await db.product.findMany({ where: { id: { in: viewedIds } }, select: { id: true, nameEn: true, nameAr: true } } })
+      ? await db.product.findMany({ where: { id: { in: viewedIds } }, select: { id: true, nameEn: true, nameAr: true } })
       : []
     const nameById = new Map(viewedProducts.map((p) => [p.id, p]))
     const topViewed = topViewedAgg

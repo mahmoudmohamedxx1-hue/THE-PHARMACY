@@ -3,8 +3,8 @@
 
 import { FREE_DELIVERY_THRESHOLD, type Zone } from "@/lib/zones";
 
-/** Egyptian mobile numbers: 010/011/012/015 + 8 digits, optional +20 prefix. */
-export const EGYPT_PHONE_RE = /^(\+?2?01)[0-9]{9}$/;
+/** Egyptian mobiles: prefixes 010/011/012/015, optional +20 country code. */
+export const EGYPT_PHONE_RE = /^(?:\+?20|0)?1[0125][0-9]{8}$/;
 
 export function normalizePhone(raw: unknown): string {
   return String(raw ?? "").replace(/[\s-]/g, "");

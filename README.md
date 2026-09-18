@@ -23,16 +23,32 @@ The catalog ships inside the repo (`db/custom.db`), so no extra seeding is neede
 
 ### Accounts
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@thepharmacy.com` | `Admin@2026` |
-| Demo customer | `demo@thepharmacy.com` | `Demo@2026` |
+Demo accounts ship with the catalog for local testing — **credentials live in
+the private seed script / your deployment secrets, never in this file.**
 
-> ⚠️ Change the admin password before going live.
+| Role | Email |
+|---|---|
+| Admin | `admin@thepharmacy.com` |
+| Demo customer | `demo@thepharmacy.com` |
+
+> ⚠️ **Before going live:** log in as admin and rotate the password (or set
+> `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars on your deployment) and disable the
+> demo account. Never commit real credentials.
 
 ### Environment variables
 
-Copy `.env.example` to `.env` if you want to override the defaults. `DATABASE_URL` is optional locally — the app falls back to `db/custom.db` in the repo. Set `NEXT_PUBLIC_SITE_URL` in production for correct SEO tags, sitemap and link previews.
+Copy `.env.example` to `.env` if you want to override the defaults. `DATABASE_URL` is optional locally — the app falls back to `db/custom.db` in the repo. Set `NEXT_PUBLIC_SITE_URL` in production for correct SEO tags, sitemap and link previews. Email (Resend) and analytics (GA4 / Meta Pixel) keys are optional — see `.env.example`.
+
+## Testing
+
+```bash
+bun run test        # unit tests (bun test) — auth, order logic, zones, rate limiter
+bun run test:e2e    # Playwright E2E — needs the app running on :3000 (auto-reuses it)
+```
+
+The E2E checkout spec places a real order in the local database — clean it up
+afterwards with `bun scripts/clean_test_order.ts TP-XXXXXXXXXX`. CI
+(`.github/workflows/ci.yml`) runs the unit tests + production build on every push.
 
 ## Deploy to Vercel
 

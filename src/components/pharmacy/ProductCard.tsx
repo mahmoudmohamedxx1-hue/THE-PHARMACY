@@ -99,11 +99,16 @@ export function ProductCard({ p, eager = false }: { p: P; eager?: boolean }) {
           {name}
         </h3>
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-h-[18px]">
-          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-          <span className="font-bold text-foreground/90">{p.rating.toFixed(1)}</span>
-          <span className="text-muted-foreground/70">({p.reviewCount})</span>
+          {/* honest social proof: ratings/reviews only show when real reviews exist */}
+          {p.reviewCount > 0 && (
+            <>
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+              <span className="font-bold text-foreground/90">{p.rating.toFixed(1)}</span>
+              <span className="text-muted-foreground/70">({p.reviewCount})</span>
+            </>
+          )}
           {p.stock > 0 && p.stock <= 10 && (
-            <span className="ms-auto text-[10.5px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">{lang === 'ar' ? 'آخر ' : 'Only '}{p.stock}</span>
+            <span className={`${p.reviewCount > 0 ? 'ms-auto' : ''} text-[10.5px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full`}>{lang === 'ar' ? 'آخر ' : 'Only '}{p.stock}</span>
           )}
         </div>
 
