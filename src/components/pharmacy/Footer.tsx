@@ -4,6 +4,12 @@ import { useLang } from './LangContext'
 import { go } from '@/lib/router'
 import { InstallAppButton } from './InstallAppButton'
 
+// Real support channels are deployment-specific — expose them as build-time
+// env vars so production never shows placeholder-looking numbers.
+// Rows simply disappear when the value is unset (honest empty > fake number).
+const SUPPORT_PHONE = (process.env.NEXT_PUBLIC_SUPPORT_PHONE || '').trim()
+const SUPPORT_WHATSAPP = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '').trim()
+
 export function Footer() {
   const { t, lang } = useLang()
 
@@ -42,10 +48,14 @@ export function Footer() {
         <div>
           <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">{t('contact_us')}</h3>
           <div className="flex flex-col gap-3 text-sm text-white/70">
-            <span className="flex items-center gap-2.5"><Phone className="w-4 h-4 text-primary" /> <span dir="ltr">15 Pharmacy (19-15)</span></span>
+            {SUPPORT_PHONE && (
+              <span className="flex items-center gap-2.5"><Phone className="w-4 h-4 text-primary" /> <span dir="ltr">{SUPPORT_PHONE}</span></span>
+            )}
             <span className="flex items-center gap-2.5"><Mail className="w-4 h-4 text-primary" /> care@thepharmacy.com</span>
             <span className="flex items-center gap-2.5"><MapPin className="w-4 h-4 text-primary" /> {lang === 'ar' ? 'القاهرة، مصر' : 'Cairo, Egypt'}</span>
-            <span className="flex items-center gap-2.5"><MessageCircle className="w-4 h-4 text-primary" /> WhatsApp <span dir="ltr">+20 100 000 0000</span></span>
+            {SUPPORT_WHATSAPP && (
+              <span className="flex items-center gap-2.5"><MessageCircle className="w-4 h-4 text-primary" /> WhatsApp <span dir="ltr">{SUPPORT_WHATSAPP}</span></span>
+            )}
           </div>
         </div>
 

@@ -307,6 +307,17 @@ export const T = {
   offline_title: { en: 'You are offline', ar: 'أنت غير متصل بالإنترنت' },
   offline_sub: { en: 'Check your connection — pages you visited recently still work offline', ar: 'تحقق من اتصالك — الصفحات التي زرتها حديثاً تعمل بدون إنترنت' },
   offline_retry: { en: 'Try again', ar: 'حاول مرة أخرى' },
+
+  // accessibility labels (screen readers read these — must match the UI language)
+  a11y_home: { en: 'The Pharmacy home', ar: 'ذا فارميسي — الرئيسية' },
+  a11y_toggle_lang: { en: 'Toggle language', ar: 'تبديل اللغة' },
+  a11y_min_price: { en: 'Minimum price', ar: 'أقل سعر' },
+  a11y_max_price: { en: 'Maximum price', ar: 'أعلى سعر' },
+  a11y_breadcrumb: { en: 'Breadcrumb', ar: 'مسار التنقل' },
+  a11y_view_product: { en: 'View product', ar: 'عرض المنتج' },
+  a11y_decrease: { en: 'Decrease quantity', ar: 'إنقاص الكمية' },
+  a11y_increase: { en: 'Increase quantity', ar: 'زيادة الكمية' },
+  a11y_remove: { en: 'Remove', ar: 'إزالة' },
 } as const
 
 export type TKey = keyof typeof T

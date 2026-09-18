@@ -1,3 +1,15 @@
+# CI workflow for The Pharmacy
+# ---------------------------------------------------------------
+# GitHub blocks pushing .github/workflows/* with a PAT that lacks the
+# `workflow` scope. To enable CI, create this file manually:
+#
+#   1. Open your repo on GitHub -> Add file -> Create new file
+#   2. Name it: .github/workflows/ci.yml
+#   3. Paste the YAML below and commit
+#
+# The CI pipeline: bun install -> prisma generate + db push ->
+# unit tests -> lint -> production build, on every push/PR to main.
+
 name: CI
 
 on:
@@ -12,22 +24,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Bun for installs/tests + Node for the Next.js build
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Unit tests (bun test)
+      - name: Prisma generate + push (SQLite)
+        run: |
+          bunx prisma generate
+          bunx prisma db push
+
+      - name: Unit tests
         run: bun test tests/unit
 
-      - name: Build (Next.js production)
-        run: bunx next build
+      - name: Lint
+        run: bun run lint
 
-      # E2E runs only locally / on a self-hosted runner with a server;
-      # on GitHub-hosted runners SQLite writes + AI keys are unavailable.
+      - name: Production build
+        run: bun run build
+        env:
+          DATABASE_URL: file:../db/custom.db

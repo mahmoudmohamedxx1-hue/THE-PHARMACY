@@ -5,7 +5,7 @@
  *   - Product images:       network-first  -> cache fallback
  *   - API GETs:             network-first  -> cache fallback (auth excluded)
  */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const C = {
   shell: 'tp-shell-' + VERSION,
   assets: 'tp-assets-' + VERSION,

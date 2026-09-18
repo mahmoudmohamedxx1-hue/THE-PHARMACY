@@ -91,7 +91,7 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 lg:px-6 py-8 pb-16">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6" aria-label="breadcrumb">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6" aria-label={t('a11y_breadcrumb')}>
         <button onClick={() => go('/')} className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</button>
         <ChevronRight className="w-3 h-3 flip-x rtl:rotate-180" />
         <button onClick={() => go(`/c/${p.category.slug}`)} className="hover:text-primary transition-colors">
@@ -212,11 +212,11 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
 
           <div className="flex items-center gap-3">
             <div className="flex items-center border rounded-2xl overflow-hidden h-12">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-11 h-full flex items-center justify-center hover:bg-accent transition-colors" aria-label="decrease">
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-11 h-full flex items-center justify-center hover:bg-accent transition-colors" aria-label={t('a11y_decrease')}>
                 <Minus className="w-4 h-4" />
               </button>
               <span className="w-10 text-center font-black">{qty}</span>
-              <button onClick={() => setQty((q) => Math.min(Math.min(p.stock, 20), q + 1))} disabled={p.stock <= 0} className="w-11 h-full flex items-center justify-center hover:bg-accent disabled:opacity-40 transition-colors" aria-label="increase">
+              <button onClick={() => setQty((q) => Math.min(Math.min(p.stock, 20), q + 1))} disabled={p.stock <= 0} className="w-11 h-full flex items-center justify-center hover:bg-accent disabled:opacity-40 transition-colors" aria-label={t('a11y_increase')}>
                 <Plus className="w-4 h-4" />
               </button>
             </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getProductDetail } from "@/lib/catalog";
 import { ProductView } from "@/components/pharmacy/ProductView";
@@ -67,6 +68,10 @@ export default async function ProductPage({ params }: Props) {
     }),
     getProductDetail(slug),
   ]);
+
+  // Unknown slugs must return a real HTTP 404 (soft-404s hurt SEO and
+  // confuse crawlers that see a "not found" page with a 200 status).
+  if (!p || !detail) notFound();
 
   // schema.org structured data for rich Google results
   const jsonLd = p

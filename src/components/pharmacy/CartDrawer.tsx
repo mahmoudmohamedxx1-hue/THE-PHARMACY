@@ -45,7 +45,7 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
               {items.map((i) => (
                 <div key={i.productId} className="flex gap-3 p-3 rounded-2xl border bg-card hover:border-primary/30 transition-colors">
-                  <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="shrink-0" aria-label="view product">
+                  <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="shrink-0" aria-label={t('a11y_view_product')}>
                     <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-20 h-20 rounded-xl border-border/50" rounded="rounded-xl" sizes="80px" />
                   </button>
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
@@ -65,7 +65,7 @@ export function CartDrawer() {
                         <button
                           onClick={() => setQty(i.productId, i.qty - 1)}
                           className="w-8 h-full flex items-center justify-center hover:bg-accent transition-colors"
-                          aria-label="decrease"
+                          aria-label={t('a11y_decrease')}
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
@@ -74,7 +74,7 @@ export function CartDrawer() {
                           onClick={() => setQty(i.productId, i.qty + 1)}
                           disabled={i.qty >= Math.min(i.stock, 20)}
                           className="w-8 h-full flex items-center justify-center hover:bg-accent disabled:opacity-40 transition-colors"
-                          aria-label="increase"
+                          aria-label={t('a11y_increase')}
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>

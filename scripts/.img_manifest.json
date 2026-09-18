@@ -1,8 +1,8 @@
 [
   {
-    "slug": "starville-fahrenheit-body-care-oud-blend",
+    "slug": "amlor-5mg-30-capsules",
     "status": "no_results",
-    "query": "Starville Fahrenheit Body Care Oud Blend product"
+    "query": "Amlor amlodipine 5mg capsules box"
   },
   {
     "slug": "devarol-s-200000-iu-ampoule",
@@ -40,19 +40,14 @@
     "query": "NYX Born To Glow Highlighter product"
   },
   {
-    "slug": "essence-nail-polish-60-shades",
-    "status": "no_results",
-    "query": "Essence Nail Polish 60+ Shades product"
-  },
-  {
     "slug": "fenty-gloss-bomb-universal",
     "status": "no_results",
     "query": "FENTY Gloss Bomb Universal product"
   },
   {
-    "slug": "frontline-plus-dog-large-3-pipettes",
+    "slug": "essence-nail-polish-60-shades",
     "status": "no_results",
-    "query": "Frontline Plus Dog Large product"
+    "query": "Essence Nail Polish 60+ Shades product"
   },
   {
     "slug": "frontline-plus-cat-3-pipettes",
@@ -60,13 +55,18 @@
     "query": "Frontline Plus Cat product"
   },
   {
+    "slug": "frontline-plus-dog-large-3-pipettes",
+    "status": "no_results",
+    "query": "Frontline Plus Dog Large product"
+  },
+  {
+    "slug": "starville-fahrenheit-body-care-oud-blend",
+    "status": "no_results",
+    "query": "Starville Fahrenheit Body Care Oud Blend product"
+  },
+  {
     "slug": "starville-screen-professional-white-top",
     "status": "no_results",
     "query": "Starville sunscreen professional SPF"
-  },
-  {
-    "slug": "amlor-5mg-30-capsules",
-    "status": "no_results",
-    "query": "Amlor amlodipine 5mg capsules box"
   }
 ]

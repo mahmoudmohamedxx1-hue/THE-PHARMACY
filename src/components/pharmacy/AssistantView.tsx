@@ -97,7 +97,7 @@ export function AssistantView() {
                     <div className="grid sm:grid-cols-2 gap-2">
                       {m.products.map((p: any) => (
                         <div key={p.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border hover:border-primary/40 transition-colors">
-                          <button onClick={() => go(`/p/${p.slug}`)} className="shrink-0" aria-label="view product">
+                          <button onClick={() => go(`/p/${p.slug}`)} className="shrink-0" aria-label={t('a11y_view_product')}>
                             <ProductImage slug={p.slug} category="pill" brand={p.brand || ''} imageUrl={p.imageUrl} alt={lang === 'ar' ? p.nameAr : p.nameEn} className="w-14 h-14 rounded-lg" rounded="rounded-lg" sizes="56px" />
                           </button>
                           <div className="flex-1 min-w-0">

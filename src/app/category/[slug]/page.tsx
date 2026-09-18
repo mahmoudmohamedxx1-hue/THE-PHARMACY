@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCategories, getProducts } from "@/lib/catalog";
 import { CategoryView } from "@/components/pharmacy/CategoryView";
@@ -35,6 +36,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
+  // Unknown category slugs return a real HTTP 404 instead of a 200 "empty
+  // grid" page (soft-404s are bad for SEO and for link sharing).
+  const exists = await db.category.findUnique({ where: { slug }, select: { slug: true } });
+  if (!exists) notFound();
+
   // SSR the default first page (unfiltered, sorted by popularity) so the
   // grid paints immediately with the HTML; filters re-fetch client-side.
   const [categories, products] = await Promise.all([

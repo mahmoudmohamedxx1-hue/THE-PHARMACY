@@ -153,7 +153,7 @@ export function PrescriptionView() {
                   size="icon"
                   className="absolute -top-3 -end-3 rounded-full w-9 h-9 shadow-lg"
                   onClick={(e) => { e.stopPropagation(); setPreview(''); setResult(null) }}
-                  aria-label="remove"
+                  aria-label={t('a11y_remove')}
                 >
                   <RotateCcw className="w-4 h-4" />
                 </Button>

@@ -48,7 +48,7 @@ bun run test:e2e    # Playwright E2E — needs the app running on :3000 (auto-re
 
 The E2E checkout spec places a real order in the local database — clean it up
 afterwards with `bun scripts/clean_test_order.ts TP-XXXXXXXXXX`. CI
-(`.github/workflows/ci.yml`) runs the unit tests + production build on every push.
+(`.github/workflows/ci.yml` — see `docs/ci-workflow.yml.txt` to enable it) runs the unit tests + production build on every push.
 
 ## Deploy to Vercel
 

@@ -62,9 +62,9 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
       <div>
         <p className="font-bold text-sm mb-3">{t('price_range')}</p>
         <div className="flex items-center gap-2 mb-3">
-          <Input type="number" value={min} onChange={(e) => setMin(Number(e.target.value) || 0)} className="h-9 rounded-xl" aria-label="min price" />
+          <Input type="number" value={min} onChange={(e) => setMin(Number(e.target.value) || 0)} className="h-9 rounded-xl" aria-label={t('a11y_min_price')} />
           <span className="text-muted-foreground">—</span>
-          <Input type="number" value={max} onChange={(e) => setMax(Number(e.target.value) || 2500)} className="h-9 rounded-xl" aria-label="max price" />
+          <Input type="number" value={max} onChange={(e) => setMax(Number(e.target.value) || 2500)} className="h-9 rounded-xl" aria-label={t('a11y_max_price')} />
         </div>
         <Slider
           value={[min, max]} min={0} max={2500} step={25}
@@ -127,7 +127,7 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
   return (
     <div className="max-w-7xl mx-auto w-full px-4 lg:px-6 py-8">
       {/* breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4" aria-label="breadcrumb">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4" aria-label={t('a11y_breadcrumb')}>
         <button onClick={() => go('/')} className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</button>
         <ChevronRight className="w-3 h-3 flip-x rtl:rotate-180" />
         <span className="font-semibold text-foreground">

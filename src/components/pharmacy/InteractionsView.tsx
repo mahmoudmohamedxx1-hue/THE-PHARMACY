@@ -102,7 +102,7 @@ export function InteractionsView() {
               <Badge key={i} variant="secondary" className="gap-1.5 py-1.5 px-3 text-sm font-semibold">
                 <Pill className="w-3.5 h-3.5 text-primary" />
                 {m}
-                <button onClick={() => { setMeds(meds.filter((_, j) => j !== i)); setAnalysis(null) }} aria-label="remove" className="hover:text-red-500 transition-colors">
+                <button onClick={() => { setMeds(meds.filter((_, j) => j !== i)); setAnalysis(null) }} aria-label={t('a11y_remove')} className="hover:text-red-500 transition-colors">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </Badge>

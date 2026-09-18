@@ -89,7 +89,7 @@ export function Header({ categories }: { categories: Cat[] }) {
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="flex items-center gap-3 h-16">
           {/* logo */}
-          <button onClick={() => go('/')} className="flex items-center gap-2.5 shrink-0 group" aria-label="The Pharmacy home">
+          <button onClick={() => go('/')} className="flex items-center gap-2.5 shrink-0 group" aria-label={t('a11y_home')}>
             <span className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-primary text-primary-foreground shadow-md group-hover:scale-105 transition-transform">
               <Cross className="w-5 h-5" strokeWidth={2.6} />
             </span>
@@ -151,7 +151,7 @@ export function Header({ categories }: { categories: Cat[] }) {
               variant="ghost" size="icon"
               onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
               className="rounded-xl h-10 gap-1.5 px-3 text-xs font-bold"
-              aria-label="Toggle language"
+              aria-label={t('a11y_toggle_lang')}
             >
               <Languages className="w-4 h-4" />
               <span className="hidden sm:inline">{lang === 'ar' ? 'EN' : 'عربي'}</span>
