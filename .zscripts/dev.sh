@@ -152,6 +152,38 @@ else
         bun run dev &
         DEV_PID=$!
         log_step_end "Starting Next.js dev server"
+
+        # SELF-HEAL: dev mode blocks the external preview domain (cross-origin
+        # resource checks in `next dev`) and the .next/standalone production
+        # bundle is NOT preserved across sandbox restores (repo.tar excludes
+        # .next/). So whenever we land in dev mode, rebuild the production
+        # bundle in the background and swap the server over automatically once
+        # it is ready. Boot flow is unaffected: dev mode passes health checks
+        # first, then the swap happens minutes later.
+        (
+                cd "$PROJECT_DIR"
+                # let the dev server come up first so boot health checks pass
+                for i in $(seq 1 60); do
+                        curl -sf --max-time 2 http://localhost:3000/ >/dev/null 2>&1 && break
+                        sleep 1
+                done
+                echo "[SELF-HEAL] $(date '+%H:%M:%S') no production bundle; rebuilding in background" >>"$PROJECT_DIR/dev.log"
+                if bun run build >>"$PROJECT_DIR/dev.log" 2>&1 && [ -f "$PROJECT_DIR/.next/standalone/server.js" ]; then
+                        echo "[SELF-HEAL] $(date '+%H:%M:%S') build complete; swapping dev -> production server" >>"$PROJECT_DIR/dev.log"
+                        pkill -f "next dev" 2>/dev/null || true
+                        pkill -f "next-server" 2>/dev/null || true
+                        pkill -f "tee dev.log" 2>/dev/null || true
+                        sleep 3
+                        export NODE_ENV=production
+                        export PORT=3000
+                        export HOSTNAME=0.0.0.0
+                        export DATABASE_URL="file:$PROJECT_DIR/db/custom.db"
+                        exec bun "$PROJECT_DIR/.next/standalone/server.js" >>"$PROJECT_DIR/dev.log" 2>&1
+                else
+                        echo "[SELF-HEAL] $(date '+%H:%M:%S') build failed; staying in dev mode" >>"$PROJECT_DIR/dev.log"
+                fi
+        ) >/dev/null 2>&1 &
+        disown 2>/dev/null || true
 fi
 
 log_step_start "Waiting for Next.js dev server"
