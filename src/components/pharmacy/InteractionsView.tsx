@@ -55,7 +55,7 @@ export function InteractionsView() {
         body: JSON.stringify({ medicines: meds, lang }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error === 'need_two' ? t('ddi_need_two') : t('ai_error')); return }
+      if (!res.ok) { setError(data.error === 'need_two' ? t('ddi_need_two') : (data.message || t('ai_error'))); return }
       setAnalysis(data.analysis)
     } catch {
       setError(t('error_generic'))

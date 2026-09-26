@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import ZAI from 'z-ai-web-dev-sdk'
+import { getZAI, aiUnavailablePayload } from '@/lib/ai'
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +45,8 @@ PRODUCTS: Product Name 1; Product Name 2
 Available catalog:
 ${catalog}`
 
-    const zai = await ZAI.create()
+    const zai = await getZAI()
+    if (!zai) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
     const completion = await zai.chat.completions.create({
       messages: [
         { role: 'system', content: system },

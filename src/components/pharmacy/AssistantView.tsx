@@ -56,7 +56,7 @@ export function AssistantView() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setMessages([...next, { role: 'assistant', content: t('ai_error') }])
+        setMessages([...next, { role: 'assistant', content: data.message || t('ai_error') }])
         return
       }
       setMessages([...next, { role: 'assistant', content: data.reply, products: data.products }])

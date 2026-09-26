@@ -74,11 +74,11 @@ export function PrescriptionView() {
     try {
       const res = await fetch('/api/prescriptions', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: preview, phone, address }),
+        body: JSON.stringify({ image: preview, phone, address, lang }),
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error === 'ai_error' ? t('ai_error') : t('error_generic'))
+        setError(data.message || (data.error === 'ai_error' ? t('ai_error') : t('error_generic')))
         return
       }
       setResult(data)

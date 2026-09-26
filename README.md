@@ -55,10 +55,12 @@ afterwards with `bun scripts/clean_test_order.ts TP-XXXXXXXXXX`. CI
 1. Push this repo to GitHub
 2. [vercel.com](https://vercel.com) → **Add New → Project** → import the repo
 3. Framework: **Next.js** (auto-detected) — keep the default build command, root directory `./`
-4. Environment variable: `NEXT_PUBLIC_SITE_URL` = your production URL
+4. Environment variable: `NEXT_PUBLIC_SITE_URL` = your production URL (e.g. `https://your-app.vercel.app`)
 5. Deploy
 
-> **SQLite note:** browsing, search, AI and admin login work read-only on Vercel; writes (orders, registrations, edits) don't persist on serverless. For a writable production store use [Turso](https://turso.tech) (SQLite-compatible, ~1h migration), Postgres (Neon/Supabase), or a VPS (`bun run build && bun run start`). See `DEPLOY.md`.
+> **How the catalog works on Vercel:** the committed SQLite catalog is bundled into every serverless function (`outputFileTracingIncludes`) and copied to `/tmp` at cold start, so **all features work out of the box — browsing, search, product pages, checkout, orders, analytics, admin**. Data writes persist per serverless instance and reset on cold starts (demo persistence). For a durable production store use [Turso](https://turso.tech) (SQLite-compatible, ~1h migration), Postgres (Neon/Supabase), or a VPS (`bun run build && bun run start`), and set `DATABASE_URL` in the Vercel project settings — the bundled-SQLite fallback is skipped entirely. See `DEPLOY.md`.
+
+> **AI features on Vercel:** the assistant, prescription OCR and drug-interaction checker need a `.z-ai-config` file at the repo root: `{"baseUrl": "https://api.z.ai/v1", "apiKey": "<your key>"}`. Without it those three features answer with a friendly "AI not enabled" message — everything else works normally.
 
 ## Project structure
 

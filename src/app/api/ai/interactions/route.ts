@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import ZAI from 'z-ai-web-dev-sdk'
+import { getZAI, aiUnavailablePayload } from '@/lib/ai'
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
 }
 If no known interactions exist, return an empty interactions array and overallRisk "low".`
 
-    const zai = await ZAI.create()
+    const zai = await getZAI()
+    if (!zai) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
     const completion = await zai.chat.completions.create({
       messages: [
         { role: 'assistant', content: system },

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
-import ZAI from 'z-ai-web-dev-sdk'
+import { getZAI, aiUnavailablePayload } from '@/lib/ai'
 
 // ---- fuzzy medicine-to-product matching ----
 function norm(s: string): string[] {
@@ -52,7 +52,7 @@ async function matchMedicines(names: string[]) {
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser()
-    const { image, address, phone, notes } = await req.json()
+    const { image, address, phone, notes, lang } = await req.json()
     const dataUrl = String(image || '')
     if (!dataUrl.startsWith('data:image/')) {
       return NextResponse.json({ error: 'invalid_image' }, { status: 400 })
@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 1) VLM reads the prescription
-    const zai = await ZAI.create()
+    const zai = await getZAI()
+    if (!zai) return NextResponse.json(aiUnavailablePayload(lang ?? 'ar'), { status: 503 })
     // SDK type demands `model`, but the vision endpoint selects its default
     // vision model when the field is omitted (verified working in E2E) —
     // cast keeps the wire payload identical to production behavior.

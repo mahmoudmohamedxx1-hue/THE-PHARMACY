@@ -60,11 +60,34 @@ const nextConfig: NextConfig = {
     imageSizes: [64, 96, 128, 256, 384],
   },
   // Ship the committed SQLite catalog + prisma engine inside every serverless
-  // function that reads the database (catalog APIs, SSR product pages, sitemap).
+  // function that touches the database. Keys must be explicit route paths —
+  // glob keys ("/api/**/*") are unreliable for nested API routes. The runtime
+  // resolver (src/lib/db.ts) copies this file to /tmp on Vercel so SQLite can
+  // write (journal + orders/analytics) on the read-only bundle filesystem.
   outputFileTracingIncludes: {
-    "/api/**/*": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/products": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/products/[id]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/categories": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/search": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/auth/login": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/auth/logout": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/auth/me": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/auth/register": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/orders": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/orders/[id]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/analytics": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/prescriptions": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/ai/assistant": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/ai/interactions": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/admin/orders": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/admin/orders/export": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/admin/products": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/admin/products/export": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/api/admin/stats": ["./db/custom.db", "./node_modules/.prisma/**/*"],
     "/product/[slug]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
     "/category/[slug]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/search/[q]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
+    "/order-success/[id]": ["./db/custom.db", "./node_modules/.prisma/**/*"],
     "/sitemap.xml": ["./db/custom.db", "./node_modules/.prisma/**/*"],
   },
   async headers() {
