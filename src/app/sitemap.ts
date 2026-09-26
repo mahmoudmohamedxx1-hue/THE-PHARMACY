@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, categories] = await Promise.all([
@@ -15,17 +14,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   return [
-    { url: SITE, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE}/prescription`, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${SITE}/assistant`, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${SITE}/interactions`, changeFrequency: "monthly", priority: 0.9 },
+    { url: SITE_URL, changeFrequency: "daily", priority: 1 },
+    { url: `${SITE_URL}/prescription`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE_URL}/assistant`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE_URL}/interactions`, changeFrequency: "monthly", priority: 0.9 },
     ...categories.map((c) => ({
-      url: `${SITE}/category/${c.slug}`,
+      url: `${SITE_URL}/category/${c.slug}`,
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
     ...products.map((p) => ({
-      url: `${SITE}/product/${p.slug}`,
+      url: `${SITE_URL}/product/${p.slug}`,
       lastModified: p.createdAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,

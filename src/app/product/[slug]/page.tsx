@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { SITE_URL } from "@/lib/site-url";
 import { getProductDetail } from "@/lib/catalog";
 import { ProductView } from "@/components/pharmacy/ProductView";
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -33,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${SITE}/product/${slug}` },
+    alternates: { canonical: `${SITE_URL}/product/${slug}` },
     openGraph: {
       title,
       description,
@@ -82,11 +81,11 @@ export default async function ProductPage({ params }: Props) {
         alternateName: p.nameAr,
         sku: p.slug,
         description: (p.descEn || p.descAr || p.nameEn).replace(/\s+/g, " ").slice(0, 500),
-        image: p.imageUrl ? [p.imageUrl.startsWith("http") ? p.imageUrl : `${SITE}${p.imageUrl}`] : undefined,
+        image: p.imageUrl ? [p.imageUrl.startsWith("http") ? p.imageUrl : `${SITE_URL}${p.imageUrl}`] : undefined,
         brand: { "@type": "Brand", name: p.brand },
         offers: {
           "@type": "Offer",
-          url: `${SITE}/product/${slug}`,
+          url: `${SITE_URL}/product/${slug}`,
           priceCurrency: "EGP",
           price: p.price,
           availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

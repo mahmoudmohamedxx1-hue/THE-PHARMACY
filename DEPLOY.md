@@ -71,14 +71,18 @@ What stays out: `node_modules`, `.next`, `.env*`, dev logs (see `.gitignore`).
 3. Framework preset: **Next.js** (auto-detected)
    - Root Directory: `./` (default — leave unchanged)
    - Build Command: leave as default (Next.js handles it)
-4. Add the environment variable (Project → Settings → Environment Variables):
+4. Environment variables (Project → Settings → Environment Variables) — **all optional**, the site works without any of them:
 
-   | Key | Value |
-   |---|---|
-   | `NEXT_PUBLIC_SITE_URL` | `https://<your-project>.vercel.app` (or your custom domain — used for SEO tags, sitemap, link previews) |
+   | Key | Value | Effect when set |
+   |---|---|---|
+   | `ZAI_API_KEY` | your z.ai API key | Enables the 3 AI features: prescription reader, health assistant, drug-interaction checker. Without it they answer with a friendly "AI not enabled" message. |
+   | `ZAI_BASE_URL` | `https://api.z.ai/v1` (default) | Only needed if your AI provider uses a different endpoint. |
+   | `NEXT_PUBLIC_SITE_URL` | `https://<your-domain>` | Optional since auto-detection: sitemap/robots/OG/canonical URLs now resolve from Vercel's own `VERCEL_PROJECT_PRODUCTION_URL`/`VERCEL_URL`. Set it only when you attach a **custom domain** (or self-host) to keep SEO tags exact. |
+   | `DATABASE_URL` | hosted DB connection string | Makes orders/users/analytics **durable and shared across instances** (see "SQLite on Vercel" below). Without it the bundled catalog is used in demo mode. |
+   | `RESEND_API_KEY` | Resend key | Sends order-confirmation emails (silently skipped otherwise). `EMAIL_FROM` optionally sets the sender address. |
 
-   `DATABASE_URL` is **not required** — the app automatically falls back to the committed `db/custom.db`.
 5. Deploy, then open the URL Vercel shows in the dashboard (don't guess it — the project name may get a random suffix like `CHEFAA-xxxx`)
+6. **Verify the deployment:** open **`/api/health`** on your deployed site — one JSON response shows the resolved site URL, database mode (demo vs persistent), whether AI and email are enabled, and the catalog size.
 
 ### If you saw `404: NOT_FOUND` after importing
 
@@ -92,7 +96,9 @@ After pulling the latest `main`, Vercel rebuilds automatically (or hit **Deploym
 
 ### AI features on your own hosting
 
-The 3 AI features (Rx OCR, health assistant, interaction checker) call the AI service from the server-side API routes. On this sandbox they work out of the box; on your own Vercel account they need the AI service credentials configured as environment variables — otherwise the rest of the store works fine and the AI endpoints return a friendly error. Contact your AI provider for the key values.
+The 3 AI features (Rx OCR, health assistant, interaction checker) call the AI service from the server-side API routes. On this sandbox they work out of the box; on your own Vercel account set **`ZAI_API_KEY`** (and optionally `ZAI_BASE_URL`, default `https://api.z.ai/v1`) as environment variables — the app picks them up automatically on the next deploy. A committed `.z-ai-config` file at the repo root works too (`{"baseUrl": "https://api.z.ai/v1", "apiKey": "<your key>"}`) but env vars are the recommended way on Vercel. Get the key from your AI provider's dashboard. Without it the rest of the store works fine and the AI endpoints return a friendly bilingual message.
+
+Verify with `curl https://<your-site>/api/health` → `"ai": { "enabled": true }`.
 
 ## 4. Opening the preview on v0
 

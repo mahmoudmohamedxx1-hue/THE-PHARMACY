@@ -1,12 +1,12 @@
 // Checkpoint WAL into main db file and switch journal_mode to DELETE
 // so the committed SQLite catalog is openable read-only on serverless (Vercel).
 // Run while the app server is STOPPED (no other connections).
+import { Database } from "bun:sqlite";
+import fs from "node:fs";
+
 const DB_PATH = "/home/z/my-project/db/custom.db";
-const { Database } = require("bun:sqlite");
 
 async function main() {
-  const fs = require("node:fs");
-
   // 1. Open writable and checkpoint (merges WAL contents into main file)
   const db = new Database(DB_PATH);
   console.log("mode before:", JSON.stringify(db.query("PRAGMA journal_mode").get()));

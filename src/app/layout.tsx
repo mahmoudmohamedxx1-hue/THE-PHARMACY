@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/pharmacy/Providers";
 import { SiteChrome } from "@/components/pharmacy/SiteChrome";
 import { PageViewTracker } from "@/components/pharmacy/PageViewTracker";
+import { SITE_URL } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,8 +23,6 @@ const cairo = Cairo({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 // Optional analytics — scripts only load when the IDs are configured at
 // build time. Without env IDs this renders nothing (zero network cost).
@@ -48,7 +47,7 @@ const SPLASH: Array<[string, string]> = [
 ];
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE),
+  metadataBase: new URL(SITE_URL),
   title: "The Pharmacy | ذا فارميسي — Egypt's Smartest Online Pharmacy",
   description:
     "The Pharmacy (ذا فارميسي): Egypt's AI-powered online pharmacy. Upload your prescription and let AI read it instantly, check drug interactions, chat with our AI health assistant, and get medicines delivered fast across Egypt.",

@@ -70,7 +70,10 @@ upload/
 .zscripts/dev.pid
 tool-results/
 examples/
-tests/
+
+# unit tests ARE committed (tests/unit) — only playwright/E2E output is ignored
+tests/e2e-results/
+tests/**/*.png
 
 # test + repair artifacts
 test-results/

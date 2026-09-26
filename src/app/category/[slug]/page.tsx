@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { SITE_URL } from "@/lib/site-url";
 import { getCategories, getProducts } from "@/lib/catalog";
 import { CategoryView } from "@/components/pharmacy/CategoryView";
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -29,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${SITE}/category/${slug}` },
+    alternates: { canonical: `${SITE_URL}/category/${slug}` },
     openGraph: { title, description, type: "website", siteName: "The Pharmacy" },
   };
 }
