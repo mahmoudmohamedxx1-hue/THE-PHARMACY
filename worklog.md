@@ -362,3 +362,23 @@ Stage Summary:
 - dev.sh now self-heals future sandbox restarts automatically (validated live)
 - Recovery script kept at scripts/start-preview.sh (launch with: `( setsid bash scripts/start-preview.sh > dev.log 2>&1 & )`)
 - 500-in-dev CSS error noted as dev-mode-only (production build unaffected); not worth fixing since dev mode is never the target state
+
+---
+Task ID: 15
+Agent: main (Super Z)
+Task: Audit live Vercel deployment (the-pharmacy-two.vercel.app) — find all bugs, fix them all
+
+Work Log:
+- AUDIT (curl + agent-browser on live URL): every DB-backed route 500ed — /api/products, /api/categories, /api/search, /api/auth/login, /api/orders, /api/analytics, /api/prescriptions, /api/ai/* (assistant/interactions), all /api/admin/*, /product/[slug], /category/[slug], /search/[q], /sitemap.xml. Only prerendered static shells (/, /cart, /login...) + 404 worked. Product pages showed "This page couldn't load" 500 page. Assistant POST returned 500 HTML.
+- ROOT CAUSES (3): (1) outputFileTracingIncludes used glob key "/api/**/*" which did not bundle db/custom.db for nested API routes; (2) committed SQLite catalog was in WAL journal mode — even READS fail on Vercel's read-only bundle FS (SQLite must create -shm/-wal files to open a WAL db); (3) z-ai-web-dev-sdk requires .z-ai-config (cwd/home//etc) which doesn't exist on Vercel -> ZAI.create() throws.
+- FIXES: db/custom.db WAL-checkpointed + journal_mode=DELETE (bun:sqlite utility scripts/fix-db-journal.ts; 496 products/2 users/54 events preserved, integrity ok); next.config.ts explicit tracing includes for all 24 DB routes/pages; src/lib/db.ts Vercel-aware resolver (copies bundled catalog to /tmp per instance -> full read+write demo persistence, safe fallback when DATABASE_URL stale); src/lib/ai.ts getZAI() + 3 AI routes return 503 + bilingual friendly message; 3 views surface server message instead of generic error.
+- VERIFIED LOCALLY (VERCEL=1, DATABASE_URL unset, standalone server): /api/products 200 JSON, /product/[slug] 200 real title, /api/search 200 suggestions, analytics POST 204 (row verified in /tmp/tp-custom.db), order POST created TP-9377546340 (48+45=93 EGP, persisted in /tmp copy).
+- Build green, sandbox preview restored (PID 3048), committed fc39d82 + pushed to GitHub -> Vercel auto-deploy.
+- NOTED: tests/ directory (24 unit + 29 E2E) was lost in the 14:53 sandbox restore — never committed to git HEAD (only playwright.config.ts tracked); restore lost working-tree-only files.
+
+Stage Summary:
+- Vercel deployment fixed end-to-end: catalog browsing, search, product/category pages, sitemap, login/register, checkout+orders, analytics, admin — all functional with per-instance persistence
+- AI features degrade gracefully pending .z-ai-config (documented in README/.env.example)
+- Durable production path documented (Turso/Neon/Supabase DATABASE_URL)
+- Awaiting live verification of the auto-deploy
+- LIVE VERIFICATION (post-deploy, the-pharmacy-two.vercel.app): /api/products 200, /api/categories 200, /api/search 200, /sitemap.xml 200 (99KB), /product/[slug] 200 (94KB full page), /category/[slug] 200 (231KB), /search/[q] 200, login POST 401 invalid_credentials (proper validation), analytics POST 204 (WRITE works on Vercel via /tmp copy), assistant POST 503 + friendly Arabic AI-unavailable message. Browser test: homepage -> product click -> product page renders (title, price, 5/5 images, zero errors).
