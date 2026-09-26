@@ -382,3 +382,31 @@ Stage Summary:
 - Durable production path documented (Turso/Neon/Supabase DATABASE_URL)
 - Awaiting live verification of the auto-deploy
 - LIVE VERIFICATION (post-deploy, the-pharmacy-two.vercel.app): /api/products 200, /api/categories 200, /api/search 200, /sitemap.xml 200 (99KB), /product/[slug] 200 (94KB full page), /category/[slug] 200 (231KB), /search/[q] 200, login POST 401 invalid_credentials (proper validation), analytics POST 204 (WRITE works on Vercel via /tmp copy), assistant POST 503 + friendly Arabic AI-unavailable message. Browser test: homepage -> product click -> product page renders (title, price, 5/5 images, zero errors).
+
+---
+Task ID: 15
+Agent: main (Super Z)
+Task: Live-site bug hunt on Vercel deployment (the-pharmacy-two.vercel.app) + answer data-architecture question + fix all found bugs
+
+Work Log:
+- Answered data question: NO external API for catalog data — everything (496 products, 10 categories, users, orders, prescriptions, analytics) lives in the bundled SQLite db/custom.db via Prisma; only external calls: AI service (z-ai SDK), Resend emails (optional), GA/Meta pixels (optional)
+- Probed all 19 routes: all 200, real data served (bundle includes db + db.ts /tmp copy on Vercel)
+- Tested write ops: register/login/order TP-4242304856 all succeed (per-instance /tmp sqlite)
+- agent-browser daemon eval channel broke mid-session (false "page hang"); switched to direct playwright-core scripts (bypass daemon) — all flows actually work
+- Verified via direct Playwright: checkout E2E, prescription upload + graceful 503 error message, AI assistant graceful degradation, interactions checker, search with filters (6 results), language toggle (AR<->EN), admin login gate, 404 page, mobile 390px no overflow, zero console errors
+- Audited all 496 products / 482 unique images + category covers: 0 broken
+- BUGS FOUND & FIXED:
+  1. sitemap.xml + robots.txt + OG + canonical ALL used http://localhost:3000 on live (510 sitemap URLs useless) -> new src/lib/site-url.ts (NEXT_PUBLIC_SITE_URL -> VERCEL_PROJECT_PRODUCTION_URL -> VERCEL_URL -> localhost), applied to 5 files
+  2. AI features (prescription reader/assistant/interactions checker) 503 on Vercel — .z-ai-config gitignored AND sandbox key is internal-only endpoint -> getZAI() bootstraps from ZAI_API_KEY/ZAI_BASE_URL env vars (temp HOME trick), friendlier bilingual message
+  3. no deployment diagnostics -> new /api/health (db mode, AI, email, catalog counts, site URL)
+  4. tests/ was gitignored (53-test suite lived only on sandbox disk, lost on restart) -> un-ignored, committed new tests/unit (15 tests: site-url resolution 8 + AI env bootstrap 7)
+  5. fix-db-journal.ts require() lint errors -> ESM imports; lint now clean
+- Cleaned test artifacts from local db, reset to committed state
+- Committed c4a0a76 + pushed to origin/main; Vercel auto-redeployed
+- VERIFIED LIVE: sitemap 510 URLs all https://the-pharmacy-two.vercel.app, robots.txt correct, OG/canonical correct with product data, /api/health works (ai:false until user sets ZAI_API_KEY, db mode demo)
+- Remaining for user (documented in DEPLOY.md): set ZAI_API_KEY to enable AI; set DATABASE_URL to hosted DB for durable orders (bundled sqlite resets per serverless instance)
+
+Stage Summary:
+- Commit c4a0a76 pushed & live: SEO/OG/sitemap/robots fixed, AI env-var config added, /api/health added, unit tests committed
+- QA scripts committed: scripts/site-sweep.mjs, scripts/image-audit-all.mjs, scripts/test-prescription-flow.mjs
+- agent-browser eval is unreliable in this sandbox — use direct playwright-core scripts (chromium at /home/z/.agent-browser/browsers/chrome-153.0.8010.47/chrome)
