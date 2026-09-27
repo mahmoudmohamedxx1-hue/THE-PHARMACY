@@ -136,13 +136,15 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
         </span>
       </nav>
 
-      <div className="flex items-end justify-between gap-4 mb-6">
-        <div>
+      {/* flex-wrap: on narrow screens the sort controls drop below the title
+          instead of overflowing the viewport (fixed 39px horizontal overflow). */}
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 mb-6">
+        <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             {searchQuery ? `"${searchQuery}"` : (lang === 'ar' ? category?.nameAr : category?.nameEn)}
           </h1>
           {category && !searchQuery && (
-            <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed">
+            <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl leading-relaxed break-words">
               {lang === 'ar' ? category.descAr : category.descEn}
             </p>
           )}
@@ -150,9 +152,9 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
             {total} {t('results')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1) }}>
-            <SelectTrigger className="w-40 sm:w-48 rounded-xl h-10 text-sm" aria-label={t('sort_by')}>
+            <SelectTrigger className="w-36 sm:w-48 rounded-xl h-10 text-sm" aria-label={t('sort_by')}>
               <SelectValue placeholder={t('sort_by')} />
             </SelectTrigger>
             <SelectContent>

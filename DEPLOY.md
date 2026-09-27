@@ -154,6 +154,23 @@ bun run lint       # ESLint
 PWA files: `public/manifest.webmanifest`, `public/sw.js`, icons in `public/icons/`.
 Regenerate icons/splash screens: `python3 scripts/gen_pwa_assets.py`
 
+## 6. Honest-data policy (fake-data purge, Sep 2026)
+
+The shipped catalog contains **zero fabricated social proof**:
+
+- Product `rating` is `0` everywhere until real reviews exist (stars/reviews are
+  hidden in the UI and JSON-LD when `reviewCount = 0`). Never re-seed ratings.
+- `compareAtPrice` is NULL everywhere — fake "was X, now Y" discount anchors
+  were removed. Only set it if the product genuinely had that price.
+- Orders, analytics events and sessions ship EMPTY. Test runs must clean up
+  after themselves (`scripts/final_cleanup.py` removes test artifacts).
+- Marketing copy only claims what is real: COD (implemented), free delivery
+  over 500 EGP (zones.ts), AI Rx reader (live). The "pharmacist support 24/7"
+  claim was removed — add it back only when a real support channel exists.
+- Support channels (phone / WhatsApp / email) are env-gated and hidden when
+  unset: `NEXT_PUBLIC_SUPPORT_PHONE`, `NEXT_PUBLIC_WHATSAPP_NUMBER`,
+  `NEXT_PUBLIC_SUPPORT_EMAIL`.
+
 ## 6. Shareable links (URL map)
 
 | Page | URL |

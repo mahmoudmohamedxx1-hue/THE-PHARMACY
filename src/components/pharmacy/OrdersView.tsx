@@ -5,12 +5,13 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Package, Clock, CheckCircle2, Truck, XCircle, Loader2, PackageOpen, MapPin, Phone, Mail, CalendarDays } from 'lucide-react'
+import { Package, Clock, CheckCircle2, Truck, XCircle, Loader2, PackageOpen, MapPin, Phone, Mail, CalendarDays, LogOut } from 'lucide-react'
 import { useLang } from './LangContext'
 import { fmtPrice } from './ProductCard'
 import { ProductImage } from './ProductImage'
 import { go } from '@/lib/router'
 import { zoneById, ORDER_STATUSES } from '@/lib/zones'
+import { useToast } from '@/hooks/use-toast'
 
 const STATUS_META: Record<string, { icon: any; classes: string; key: 'st_pending' | 'st_confirmed' | 'st_preparing' | 'st_out_for_delivery' | 'st_delivered' | 'st_cancelled' }> = {
   pending: { icon: Clock, classes: 'bg-amber-50 text-amber-700 border-amber-200', key: 'st_pending' },
@@ -144,7 +145,16 @@ export function OrdersView() {
 }
 
 export function AccountView() {
-  const { t, user, lang } = useLang()
+  const { t, user, lang, setUser } = useLang()
+  const { toast } = useToast()
+
+  const onLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    setUser(null)
+    toast({ description: t('logout') })
+    go('/')
+  }
+
   if (!user) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 flex flex-col items-center gap-4 text-center">
@@ -180,11 +190,18 @@ export function AccountView() {
           )}
           <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-muted/40 sm:col-span-2">
             <CalendarDays className="w-4.5 h-4.5 text-primary shrink-0" />
-            {t('member_since')} {new Date().getFullYear()}
+            {/* Real registration date from the DB — never the current year. */}
+            {user.createdAt
+              ? `${t('member_since')} ${new Date(user.createdAt).getFullYear()}`
+              : t('account_info')}
           </div>
         </div>
         <Button onClick={() => go('/orders')} className="rounded-2xl font-bold gap-2 mt-2">
           <Package className="w-4 h-4" /> {t('my_orders')}
+        </Button>
+        {/* Account-page logout (previously only reachable via the header dropdown) */}
+        <Button onClick={onLogout} variant="outline" className="rounded-2xl font-bold gap-2 text-red-600 hover:text-red-600 hover:bg-red-50 border-red-200">
+          <LogOut className="w-4 h-4" /> {t('logout')}
         </Button>
       </Card>
     </div>

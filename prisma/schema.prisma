@@ -62,7 +62,7 @@ model Product {
   images               String      @default("") // JSON array of gallery image paths
   prescriptionRequired Boolean     @default(false)
   stock                Int         @default(0)
-  rating               Float       @default(4.5)
+  rating               Float       @default(0) // honest: 0 until real reviews exist
   reviewCount          Int         @default(0)
   popularity           Int         @default(0)
   isFeatured           Boolean     @default(false)

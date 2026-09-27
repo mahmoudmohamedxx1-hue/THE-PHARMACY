@@ -27,10 +27,11 @@ export const T = {
   hero_cta_shop: { en: 'Start Shopping', ar: 'ابدأ التسوق' },
   hero_cta_rx: { en: 'Upload Prescription', ar: 'ارفع الروشتة' },
 
-  // promo strip
+  // promo strip — every claim must be backed by something real:
+  // COD payment (implemented), genuine sourcing (business promise), free-delivery rule (zones.ts), AI Rx reader (live feature).
   promo_1: { en: 'Free delivery over 500 EGP', ar: 'توصيل مجاني للطلبات فوق 500 جنيه' },
   promo_2: { en: '100% genuine products', ar: 'منتجات أصلية 100%' },
-  promo_3: { en: 'Pharmacist support 24/7', ar: 'دعم صيدلي على مدار الساعة' },
+  promo_3: { en: 'Cash on delivery available', ar: 'الدفع عند الاستلام متاح' },
   promo_4: { en: 'AI reads your prescription', ar: 'الذكاء الاصطناعي يقرأ روشتتك' },
 
   // sections
@@ -157,7 +158,7 @@ export const T = {
 
   // assistant
   assistant_title: { en: 'AI Health Assistant', ar: 'المساعد الصحي الذكي' },
-  assistant_sub: { en: 'Ask about symptoms, vitamins or product suggestions — powered by AI, reviewed by pharmacists.', ar: 'اسأل عن الأعراض أو الفيتامينات أو اقتراحات المنتجات — بالذكاء الاصطناعي وإشراف الصيادلة.' },
+  assistant_sub: { en: 'Ask about symptoms, vitamins or product suggestions — powered by AI.', ar: 'اسأل عن الأعراض أو الفيتامينات أو اقتراحات المنتجات — مدعوم بالذكاء الاصطناعي.' },
   assistant_placeholder: { en: 'e.g. I have a headache and mild fever…', ar: 'مثال: عندي صداع وحرارة بسيطة…' },
   send: { en: 'Send', ar: 'إرسال' },
   assistant_disclaimer: { en: 'AI guidance — not a medical diagnosis. Consult a pharmacist for prescription medicines.', ar: 'إرشاد ذكي — وليس تشخيصاً طبياً. استشر الصيدلي بشأن الأدوية الموصوفة.' },
@@ -290,8 +291,8 @@ export const T = {
   cod_available: { en: 'Cash on delivery available', ar: 'الدفع عند الاستلام متاح' },
   shop_now: { en: 'Shop now', ar: 'اشترِ الآن' },
   best_sellers: { en: 'Best sellers', ar: 'الأكثر مبيعاً' },
-  best_sellers_sub: { en: 'Most-loved products by our customers', ar: 'المنتجات المفضلة لعملائنا' },
-  featured_sub: { en: 'Hand-picked by our pharmacists', ar: 'مختارة بعناية من صيادلتنا' },
+  best_sellers_sub: { en: 'Most popular products right now', ar: 'الأكثر رواجاً الآن' },
+  featured_sub: { en: 'Top picks, ready to ship', ar: 'منتجات مميزة جاهزة للشحن' },
 
   // PWA install
   install_app: { en: 'Install App', ar: 'تثبيت التطبيق' },

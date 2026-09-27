@@ -38,6 +38,8 @@ export interface HomeInitialData {
   categories: import('./hooks').Category[]
   featured: import('./hooks').ProductsResponse
   popular: import('./hooks').ProductsResponse
+  /** Unfiltered catalog size — the honest number behind "genuine products". */
+  totalAll?: number
 }
 
 export function HomeView({ initial }: { initial?: HomeInitialData }) {
@@ -46,12 +48,17 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
   // react-query then refreshes in the background when the cache goes stale.
   const { data: categories = [] } = useCategories(initial?.categories)
   const { data: featured } = useProducts({ featured: 'true', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.featured)
-  const { data: popular } = useProducts({ sort: 'rating', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.popular)
+  const { data: popular } = useProducts({ sort: 'popular', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.popular)
   const recentIds = useRecent((s) => s.ids)
   const { data: recentData } = useProductsByIds(recentIds.slice(0, 5), recentIds.length > 0)
 
   const featuredItems: Product[] = featured?.items?.length ? featured.items : popular?.items || []
-  const totalCount = popular?.total || featured?.total || 0
+  // Hero stat = real catalog total (sum of category counts — all 496 products,
+  // not the filtered in-stock grid count). Consistent between SSR and client nav.
+  const totalCount = categories.reduce((s, c) => s + (c.productCount || 0), 0)
+    || initial?.totalAll
+    || popular?.total
+    || 0
   const topBrands = (popular?.brands || []).filter((b) => b.count >= 3).slice(0, 12)
   const recentItems: Product[] = recentIds.length && recentData?.items?.length
     ? recentIds.slice(0, 5).map((id) => recentData.items.find((p) => p.id === id)).filter(Boolean) as Product[]
@@ -88,11 +95,13 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
               </Link>
             </div>
             <div className="flex items-center gap-5 pt-4 text-sm">
-              <span className="flex flex-col">
-                <span className="text-2xl font-black text-primary">{totalCount ? `${totalCount}+` : '460+'}</span>
-                <span className="text-xs text-muted-foreground">{lang === 'ar' ? 'منتج أصلي' : 'genuine products'}</span>
-              </span>
-              <span className="w-px h-8 bg-border" />
+              {totalCount > 0 && (
+                <span className="flex flex-col">
+                  <span className="text-2xl font-black text-primary">{totalCount}+</span>
+                  <span className="text-xs text-muted-foreground">{lang === 'ar' ? 'منتج أصلي' : 'genuine products'}</span>
+                </span>
+              )}
+              {totalCount > 0 && <span className="w-px h-8 bg-border" />}
               <span className="flex flex-col">
                 <span className="text-2xl font-black text-primary">3</span>
                 <span className="text-xs text-muted-foreground">{lang === 'ar' ? 'أدوات ذكاء اصطناعي' : 'AI health tools'}</span>

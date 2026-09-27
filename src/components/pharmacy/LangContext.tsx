@@ -6,6 +6,8 @@ import { t as translate, type TKey } from '@/lib/i18n'
 
 export interface AuthUser {
   id: string; email: string; name: string | null; phone: string | null; isAdmin: boolean
+  /** Real registration date (ISO) — powers the honest "Member since" display. */
+  createdAt?: string
 }
 
 interface LangCtx {

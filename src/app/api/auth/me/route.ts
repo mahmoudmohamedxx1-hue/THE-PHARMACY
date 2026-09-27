@@ -5,6 +5,14 @@ export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ user: null })
   return NextResponse.json({
-    user: { id: user.id, email: user.email, name: user.name, phone: user.phone, isAdmin: user.isAdmin },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+      // Real registration date — powers the honest "Member since" display.
+      createdAt: user.createdAt,
+    },
   })
 }
