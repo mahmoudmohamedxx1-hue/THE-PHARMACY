@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { visionComplete, aiUnavailablePayload } from '@/lib/ai'
+import { parseMedicationNames } from '@/lib/rx-parse'
 
 export const maxDuration = 60
 
@@ -71,9 +72,8 @@ export async function POST(req: NextRequest) {
     if (!result) return NextResponse.json(aiUnavailablePayload(lang ?? 'ar'), { status: 503 })
     const extracted = result.content
 
-    // 2) parse medication names
-    const medsLine = extracted.split('\n').find((l) => l.toLowerCase().startsWith('medications:')) || ''
-    const names = medsLine.replace(/^medications:/i, '').split(/[;,\n]/).map((s) => s.replace(/^\d+[\.\)]\s*/, '').trim()).filter(Boolean)
+    // 2) parse medication names — strict format first, then loose fallback
+    const names = parseMedicationNames(extracted)
     const dosagesLine = extracted.split('\n').find((l) => l.toLowerCase().startsWith('dosages:')) || ''
     const notesLine = extracted.split('\n').find((l) => l.toLowerCase().startsWith('notes:')) || ''
 

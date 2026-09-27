@@ -1,6 +1,7 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
 import {
   chatComplete,
+  visionComplete,
   getAIStatus,
   __resetAIChainForTests,
   __setZAIFactoryForTests,
@@ -191,7 +192,13 @@ describe("getAIStatus()", () => {
     const s = getAIStatus(false);
     expect(s.enabled).toBe(true);
     expect(s.mode).toBe("keyless-pool");
-    expect(s.providers).toEqual(["pollinations", "kilo", "llm7"]);
+    expect(s.providers).toEqual([
+      "pollinations",
+      "kilo",
+      "llm7",
+      "ovh-vision",
+      "kilo-omni-vision",
+    ]);
   });
 
   test("off mode when pool disabled and no SDK", () => {
@@ -199,5 +206,75 @@ describe("getAIStatus()", () => {
     const s = getAIStatus(false);
     expect(s.enabled).toBe(false);
     expect(s.mode).toBe("off");
+  });
+});
+
+// ---- sanity guards ---------------------------------------------------------
+
+describe("response sanity guards", () => {
+  test("safety-classifier output is rejected and the chain moves on", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    responsesByUrl[POLL] = ok("User Safety: safe\nResponse Safety: safe");
+    responsesByUrl[KILO] = ok("REAL_REPLY");
+    const r = await chatComplete(MSGS);
+    expect(r?.provider).toBe("kilo");
+    expect(r?.content).toBe("REAL_REPLY");
+  });
+
+  test("bare refusal is rejected and the chain moves on", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    responsesByUrl[POLL] = ok("I'm sorry, but I can't help with that.");
+    responsesByUrl[KILO] = ok("REAL_REPLY");
+    const r = await chatComplete(MSGS);
+    expect(r?.provider).toBe("kilo");
+    expect(r?.content).toBe("REAL_REPLY");
+  });
+
+  test("an apologetic but substantive answer is NOT treated as a refusal", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    const long =
+      "I'm sorry to hear about your headache. For mild pain and fever, Panadol Extra (paracetamol) is commonly used — one 500mg tablet every 8 hours. If symptoms persist for more than 3 days, please see a doctor.";
+    responsesByUrl[POLL] = ok(long);
+    const r = await chatComplete(MSGS);
+    expect(r?.provider).toBe("pollinations");
+    expect(r?.content).toBe(long);
+  });
+});
+
+// ---- vision chain (prescription OCR) ----------------------------------------
+
+const OVH = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions";
+const IMG = "data:image/png;base64,AAAA";
+const OCR_GOOD =
+  "MEDICATIONS: Panadol Extra; Augmentin; Ventolin inhaler\nDOSAGES: 500mg 1 tab every 8h; 1g twice daily; as needed\nNOTES: 7 days for Augmentin";
+
+describe("visionComplete() keyless vision lanes", () => {
+  test("returns the first usable lane result", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    responsesByUrl[OVH] = ok(OCR_GOOD);
+    const r = await visionComplete("read this", IMG);
+    expect(r?.provider).toBe("ovh-vision");
+    expect(r?.content).toBe(OCR_GOOD);
+  });
+
+  test("falls back to the kilo omni lane when OVH is unusable", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    // OVH answers with the safety-classifier shape (the old openrouter/free
+    // failure mode) — the guard must reject it and use the omni lane.
+    responsesByUrl[OVH] = ok("User Safety: safe");
+    responsesByUrl[KILO] = ok(
+      "Based on the image provided:\n\n1. **Panadol Extra**: 500mg — 1 tab every 8h\n2. **Augmentin**: 1g — twice daily",
+    );
+    const r = await visionComplete("read this", IMG);
+    expect(r?.provider).toBe("kilo-omni-vision");
+    expect(r?.content).toContain("Panadol");
+  });
+
+  test("both lanes unusable -> null", async () => {
+    globalThis.fetch = fakeFetch as unknown as typeof fetch;
+    responsesByUrl[OVH] = ok("User Safety: safe");
+    responsesByUrl[KILO] = httpError();
+    const r = await visionComplete("read this", IMG);
+    expect(r).toBeNull();
   });
 });

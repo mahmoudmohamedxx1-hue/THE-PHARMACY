@@ -150,6 +150,38 @@ const KEYLESS_PROVIDERS: KeylessProvider[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Response sanity guards.
+//
+// Free keyless endpoints route to rotating models, and two failure shapes
+// look "successful" to a naive content check:
+//   1. Safety-classifier outputs (Kilo `openrouter/free` currently routes to
+//      nvidia/nemotron content-safety, which replies "User Safety: safe").
+//   2. Bare refusals ("I'm sorry, but I can't help with that.").
+// Both must be rejected so the chain falls through to the next provider
+// instead of surfacing garbage as an assistant answer or OCR text.
+// ---------------------------------------------------------------------------
+
+/** Output of a content-safety classifier model — never a usable answer. */
+export function isSafetyClassifierOutput(content: string): boolean {
+  const t = content.trim();
+  return t.length < 250 && /^(?:user|response|prompt)\s+safety\s*:/i.test(t);
+}
+
+/** A short, bare refusal with no substantive content. Longer answers that
+ *  merely open apologetically ("I'm sorry to hear that — here is what…") are
+ *  NOT caught, so genuine pharmacist-style replies always pass. */
+export function isBareRefusal(content: string): boolean {
+  const t = content.trim();
+  if (t.length >= 200) return false;
+  return /\b(?:i'?m sorry|i am sorry|sorry)[\s,]*\b|\b(?:can'?t|cannot|unable to)\s+(?:help|assist|comply|provide)\b/i.test(t) &&
+    /sorry|can'?t|cannot|unable/i.test(t);
+}
+
+function usableContent(content: string): boolean {
+  return content.trim().length > 0 && !isSafetyClassifierOutput(content) && !isBareRefusal(content);
+}
+
 /** ZAI model to request (the sandbox gateway accepts glm-5.3-flash). */
 const ZAI_MODEL = process.env.ZAI_MODEL || "glm-5.3-flash";
 
@@ -200,9 +232,10 @@ async function callKeyless(
     const content =
       (data as { choices?: { message?: { content?: unknown } }[] })
         ?.choices?.[0]?.message?.content;
-    if (typeof content !== "string" || content.trim().length === 0) {
+    if (typeof content !== "string" || !usableContent(content)) {
       // Reasoning models can burn the whole budget on chain-of-thought and
-      // return a null content — treat as failure so the chain moves on.
+      // return null content; free pools can route to safety classifiers or
+      // refuse. Treat all of these as failure so the chain moves on.
       keylessFailUntil.set(p.id, Date.now() + FAIL_COOLDOWN_MS);
       return null;
     }
@@ -234,7 +267,7 @@ async function callZAI(
       const payload = maxTokens ? { ...body, max_tokens: maxTokens } : body;
       const completion = await zai.chat.completions.create(payload);
       const content = completion.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim().length > 0) return content;
+      if (typeof content === "string" && usableContent(content)) return content;
     } catch (e) {
       console.warn(`[ai] ZAI attempt failed: ${String((e as Error)?.message || e).slice(0, 160)}`);
     }
@@ -268,8 +301,18 @@ export async function chatComplete(
 }
 
 /**
- * Vision completion (prescription OCR): ZAI createVision first, then a
- * keyless vision-capable fallback (OVH Qwen2.5-VL). Data URLs are accepted.
+ * Vision completion (prescription OCR): ZAI createVision first, then a race
+ * between the keyless vision-capable providers. Data URLs are accepted.
+ *
+ * Keyless vision providers (both verified reading real prescriptions):
+ *   - OVHcloud AI Endpoints Qwen2.5-VL-72B — excellent format compliance but
+ *     intermittently 429s; retried once after a short backoff.
+ *   - Kilo Gateway nvidia/nemotron-3-nano-omni (free) — slower reasoning
+ *     model, tolerant prompt format; a good second lane.
+ *
+ * The old Kilo `openrouter/free` vision fallback was removed: the pool now
+ * routes that id to nvidia's content-safety classifier, which replies
+ * "User Safety: safe" — the sanity guards reject such output.
  */
 export async function visionComplete(
   text: string,
@@ -291,7 +334,7 @@ export async function visionComplete(
         thinking: { type: "disabled" },
       } as Parameters<typeof zai.chat.completions.createVision>[0]);
       const content = completion.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim().length > 0) {
+      if (typeof content === "string" && usableContent(content)) {
         return { content, provider: "zai-vision" };
       }
     } catch (e) {
@@ -301,8 +344,65 @@ export async function visionComplete(
 
   if (!keylessPoolEnabled()) return null;
 
-  // Keyless vision fallback #1: Kilo Gateway — its pooled free models accept
-  // OpenAI-style image_url content (verified working keyless).
+  const lanes: Promise<ChatResult | null>[] = [
+    ovhVision(text, imageDataUrl),
+    kiloOmniVision(text, imageDataUrl),
+  ];
+  return firstUsable(lanes);
+}
+
+/** OVHcloud Qwen2.5-VL-72B-Instruct — keyless OpenAI-compatible vision. */
+async function ovhVision(text: string, imageDataUrl: string): Promise<ChatResult | null> {
+  const url = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions";
+  const body = JSON.stringify({
+    model: "Qwen2.5-VL-72B-Instruct",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text },
+          { type: "image_url", image_url: { url: imageDataUrl } },
+        ],
+      },
+    ],
+    max_tokens: 1024,
+    temperature: 0.1,
+  });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        signal: AbortSignal.timeout(25000),
+      });
+      if (res.status === 429 || res.status === 502 || res.status === 503) {
+        // Known intermittent rate limiting — one short backoff retry.
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 4000));
+          continue;
+        }
+        return null;
+      }
+      if (res.ok) {
+        const data: unknown = await res.json();
+        const content =
+          (data as { choices?: { message?: { content?: unknown } }[] })
+            ?.choices?.[0]?.message?.content;
+        if (typeof content === "string" && usableContent(content)) {
+          return { content, provider: "ovh-vision" };
+        }
+      }
+      return null; // hard error (auth/404/bad request) — do not retry
+    } catch {
+      return null; // timeout — do not retry (keeps the race budget)
+    }
+  }
+  return null;
+}
+
+/** Kilo Gateway free omni model — multimodal, accepts OpenAI-style images. */
+async function kiloOmniVision(text: string, imageDataUrl: string): Promise<ChatResult | null> {
   try {
     const res = await fetch(
       "https://api.kilo.ai/api/gateway/chat/completions",
@@ -310,7 +410,7 @@ export async function visionComplete(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "openrouter/free",
+          model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
           messages: [
             {
               role: "user",
@@ -323,7 +423,7 @@ export async function visionComplete(
           max_tokens: 2048,
           temperature: 0.1,
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(50000),
       },
     );
     if (res.ok) {
@@ -331,53 +431,41 @@ export async function visionComplete(
       const content =
         (data as { choices?: { message?: { content?: unknown } }[] })
           ?.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim().length > 0) {
-        return { content, provider: "kilo-vision" };
-      }
-    }
-  } catch {
-    // fall through
-  }
-
-  // Keyless vision fallback #2: OVHcloud AI Endpoints expose a keyless
-  // OpenAI-compatible route with Qwen2.5-VL-72B. Best effort — some networks
-  // rate-limit it (429); on failure the caller degrades gracefully.
-  try {
-    const res = await fetch(
-      "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "Qwen2.5-VL-72B-Instruct",
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text },
-                { type: "image_url", image_url: { url: imageDataUrl } },
-              ],
-            },
-          ],
-          max_tokens: 1024,
-          temperature: 0.1,
-        }),
-        signal: AbortSignal.timeout(20000),
-      },
-    );
-    if (res.ok) {
-      const data: unknown = await res.json();
-      const content =
-        (data as { choices?: { message?: { content?: unknown } }[] })
-          ?.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim().length > 0) {
-        return { content, provider: "ovh-vision" };
+      if (typeof content === "string" && usableContent(content)) {
+        return { content, provider: "kilo-omni-vision" };
       }
     }
   } catch {
     // fall through
   }
   return null;
+}
+
+/** Resolve to the first non-null usable result; null when all lanes fail. */
+function firstUsable(lanes: Promise<ChatResult | null>[]): Promise<ChatResult | null> {
+  return new Promise((resolve) => {
+    let pending = lanes.length;
+    let settled = false;
+    const tick = () => {
+      pending--;
+      if (pending === 0 && !settled) resolve(null);
+    };
+    for (const lane of lanes) {
+      lane
+        .then((r) => {
+          if (settled) return;
+          if (r) {
+            settled = true;
+            resolve(r);
+          } else {
+            tick();
+          }
+        })
+        .catch(() => {
+          if (!settled) tick();
+        });
+    }
+  });
 }
 
 // Test-only injection point so unit tests can force the ZAI path on/off
@@ -397,11 +485,13 @@ export function getAIStatus(zaiReady: boolean): {
   const pool = keylessPoolEnabled()
     ? KEYLESS_PROVIDERS.map((p) => p.id)
     : [];
+  // Vision lanes used by the prescription reader (OCR).
+  const vision = keylessPoolEnabled() ? ["ovh-vision", "kilo-omni-vision"] : [];
   if (zaiReady) {
-    return { enabled: true, mode: "zai", providers: ["zai", ...pool] };
+    return { enabled: true, mode: "zai", providers: ["zai", ...pool, ...vision] };
   }
   if (pool.length > 0) {
-    return { enabled: true, mode: "keyless-pool", providers: pool };
+    return { enabled: true, mode: "keyless-pool", providers: [...pool, ...vision] };
   }
   return { enabled: false, mode: "off", providers: [] };
 }
