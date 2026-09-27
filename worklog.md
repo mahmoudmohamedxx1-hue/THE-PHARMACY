@@ -459,3 +459,25 @@ Stage Summary:
 - Live prescription OCR is the one remaining live bug — fix is committed locally (32463d5), awaiting push
 - Local preview server running the fixed build (start-preview.sh, clean db)
 - QA scripts committed: edge-bug-hunt.mjs, e2e-purchase-full.mjs, probe-vision-providers.mjs + debug suite
+
+---
+Task ID: 17
+Agent: Super Z (main agent)
+Task: Full fake-data + bug hunt with in-browser user audit ("analyze the website well... never leave anything even small... audit in browser as a user... then fix them")
+
+Work Log:
+- Audited DB deep: 496 fabricated ratings (3.8-4.9, reviewCount=0); 140 fake compareAtPrice discount anchors (ratios 1.08-1.24, rendered as red -X% badges + crossed prices); 2 seed/test orders (one address literally "E2E test address", visible in admin); 128 analytics events (fake funnel, 100% conversion); 15 stale sessions; Sudocrem AR "تسريع الشفاء" medical claim
+- In-browser user audit (phase 1 walk of 21 routes + mobile 375px): found 39px horizontal overflow on /category/vitamins + 36px on /search (NOT on skin-care) — bisected to the title+sort row lacking flex-wrap (title 131px + Select 160 + Filters 80 > 343px container); hero stat showed "461+" (in-stock+image filtered count) with a hardcoded '460+' fallback; discount badges/stars verified on product pages
+- Phase 2/3 user journeys: guest checkout placed TP order ✓, register/login/logout ✓, assistant real reply + product cards ✓, interactions API analysis ✓ (UI is chip-based — initial "broken" reading was my selector mistake), CSV export ✓, admin dashboard showed the fake data surfaces (fake orders, 100% conversion)
+- Account page audit found: "Member since {new Date().getFullYear()}" (fabricated — always current year); no logout button on /account (only in header dropdown)
+- Code claim audit: "Pharmacist support 24/7" (no support channel exists), assistant "reviewed by pharmacists" (false), featured "Hand-picked by our pharmacists" (no pharmacists), best-sellers "Most-loved by our customers" (zero customers), footer care@thepharmacy.com (domain we don't own)
+- FIXES (code): CategoryView row flex-wrap + gap-y-3 + min-w-0 + Select w-36 (mobile overflow gone); HomeView hero count = real catalog total via categories sum (496) with no fake fallback; home popular section sort rating -> popular; /api/auth/me returns createdAt; AccountView real member-since year + logout button; i18n claims replaced with real ones (COD promo etc.); footer email env-gated (NEXT_PUBLIC_SUPPORT_EMAIL); Prisma rating default 4.5 -> 0
+- FIXES (DB, scripts/clean_fake_data_v2.py + final_cleanup.py): ratings zeroed, anchors NULLed, seed orders + test orders deleted w/ stock restore, events/sessions purged, Sudocrem softened; final pristine state: 496 products / 10 categories / 2 users (admin+demo) / 0 orders / 0 events / 0 fake anything / integrity ok
+- DEPLOY.md: documented the honest-data policy + new env var
+- Verified post-fix in browser: hero 496+, 0 discount badges, 0 crossed prices, 0 mobile overflow (375px home/category/checkout), no 24/7 claim, footer clean, logout works, admin honest empty state; full guest checkout regression placed an order (then cleaned); 39/39 unit tests; tsc + eslint clean
+- Committed 74259dd; PUSH BLOCKED (no GitHub credentials in this session — PAT stripped earlier); user must push or provide a PAT for Vercel to pick up: fake-data purge + mobile overflow fix + honest member-since + unpushed vision-chain fix (32463d5) are all in local main
+
+Stage Summary:
+- Every fake-data surface found in DB, i18n copy, and components is now removed or made honest; 3 real UI bugs fixed (mobile overflow, member-since, hero count) + account logout UX
+- Local build verified end-to-end; repo is 3 commits ahead of origin/main awaiting push
+- Audit scripts committed: audit-browser-phase1/phase2/bcd/cde.mjs, verify-fixes.mjs, clean_fake_data_v2.py, final_cleanup.py, debug-overflow-*.mjs
