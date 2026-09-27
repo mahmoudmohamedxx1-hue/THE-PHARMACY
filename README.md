@@ -62,14 +62,15 @@ Optional environment variables (Vercel → Settings → Environment Variables):
 
 | Key | Effect |
 |---|---|
-| `ZAI_API_KEY` | enables the AI assistant, prescription reader and interaction checker (default AI endpoint `https://api.z.ai/v1`, override with `ZAI_BASE_URL`) |
+| `ZAI_API_KEY` (optional) | prefers the GLM SDK for AI features (default endpoint `https://api.z.ai/v1`, override with `ZAI_BASE_URL`, model via `ZAI_MODEL` — default `glm-5.3-flash`). AI also works with no key via the keyless free-model pool |
+| `FREE_LLM_POOL` | set `off` to disable the keyless fallback providers (default: on) |
 | `DATABASE_URL` | hosted DB (Turso/Neon/Supabase) for durable, shared data |
 | `NEXT_PUBLIC_SITE_URL` | set only when using a custom domain — otherwise sitemap/robots/OG URLs auto-resolve from the Vercel domain |
 | `RESEND_API_KEY` (+ `EMAIL_FROM`) | order-confirmation emails |
 
 > **How the catalog works on Vercel:** the committed SQLite catalog is bundled into every serverless function (`outputFileTracingIncludes`) and copied to `/tmp` at cold start, so **all features work out of the box — browsing, search, product pages, checkout, orders, analytics, admin**. Data writes persist per serverless instance and reset on cold starts (demo persistence). For a durable production store use [Turso](https://turso.tech) (SQLite-compatible, ~1h migration), Postgres (Neon/Supabase), or a VPS (`bun run build && bun run start`), and set `DATABASE_URL` in the Vercel project settings — the bundled-SQLite fallback is skipped entirely. See `DEPLOY.md`.
 
-> **AI features on Vercel:** set the **`ZAI_API_KEY`** environment variable (or commit a `.z-ai-config` file at the repo root: `{"baseUrl": "https://api.z.ai/v1", "apiKey": "<your key>"}`). Without it those three features answer with a friendly "AI not enabled" message — everything else works normally.
+> **AI features are keyless by default.** Every AI route works with zero configuration through a built-in pool of free, credential-less providers (mirroring the audited [freellmpool](https://github.com/0xzr/freellmpool) catalog: Pollinations, Kilo Gateway, LLM7 — with a Kilo vision route for prescription OCR). Set **`ZAI_API_KEY`** to prefer the GLM SDK (`glm-5.3-flash` by default, override with `ZAI_MODEL`), or set `FREE_LLM_POOL=off` to restrict the site to configured providers only. The pool fail-overs automatically, cools down failing providers for 60s, and sticks to the fastest healthy route.
 
 ## Project structure
 

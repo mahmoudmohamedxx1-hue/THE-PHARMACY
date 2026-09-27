@@ -1,25 +1,48 @@
-// Comprehensive site sweep of the live deployment — pages, console errors, broken assets, key flows
+// Comprehensive site sweep of a deployment — pages, console errors, broken assets, key flows
+// Recycles the browser context every 8 pages to keep memory bounded on long sweeps.
 import { chromium } from 'playwright-core';
 
 const BROWSER = '/home/z/.agent-browser/browsers/chrome-153.0.8010.47/chrome';
 const SITE = process.argv[2] || 'https://the-pharmacy-two.vercel.app';
 
 const browser = await chromium.launch({ executablePath: BROWSER, headless: true });
-const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
-const page = await ctx.newPage();
 
 const issues = [];
 const ok = [];
 const consoleErrs = [];
-page.on('console', (m) => { if (m.type() === 'error') consoleErrs.push(m.text().slice(0, 250)); });
-page.on('pageerror', (e) => issues.push(`PAGEERROR: ${String(e).slice(0, 250)}`));
-page.on('requestfailed', (r) => { const u = r.url(); if (u.includes('_rsc=') || u.includes('/_next/image')) return; issues.push(`REQFAIL: ${r.method()} ${u.slice(0, 120)} :: ${r.failure()?.errorText}`); });
+
+let ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+let page = await ctx.newPage();
+
+function attachListeners(p) {
+  p.on('console', (m) => { if (m.type() === 'error') consoleErrs.push(m.text().slice(0, 250)); });
+  p.on('pageerror', (e) => issues.push(`PAGEERROR: ${String(e).slice(0, 250)}`));
+  p.on('requestfailed', (r) => {
+    const u = r.url();
+    // _rsc prefetch aborts and cancelled lazy images are benign navigation noise
+    if (u.includes('_rsc=') || u.includes('/_next/image')) return;
+    issues.push(`REQFAIL: ${r.method()} ${u.slice(0, 120)} :: ${r.failure()?.errorText}`);
+  });
+}
+attachListeners(page);
+
+let pagesVisited = 0;
+async function recycleIfNeeded() {
+  pagesVisited++;
+  if (pagesVisited % 8 === 0) {
+    try { await ctx.close(); } catch {}
+    ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+    page = await ctx.newPage();
+    attachListeners(page);
+    console.log(`  [recycled browser context after ${pagesVisited} pages]`);
+  }
+}
 
 async function checkPage(path, name, opts = {}) {
+  await recycleIfNeeded();
   try {
     const resp = await page.goto(SITE + path, { waitUntil: 'networkidle', timeout: 45000 });
     const status = resp.status();
-    const title = await page.title().catch(() => '');
     // broken images on the page
     const brokenImgs = await page.evaluate(async () => {
       const imgs = Array.from(document.querySelectorAll('img'));
@@ -38,7 +61,6 @@ async function checkPage(path, name, opts = {}) {
     issues.push(`${name} (${path}): ${String(e).slice(0, 150)}`);
   }
 }
-
 
 async function checkPage404(path) {
   try {
@@ -66,7 +88,6 @@ await checkPage('/orders', 'Orders');
 await checkPage('/wishlist', 'Wishlist');
 await checkPage('/checkout', 'Checkout (empty cart redirect?)');
 await checkPage('/admin', 'Admin');
-// 404 behavior is asserted via HTTP status below
 await checkPage404('/nonexistent-page-xyz');
 await checkPage('/sitemap.xml', 'Sitemap');
 await checkPage('/robots.txt', 'Robots');
@@ -74,7 +95,8 @@ await checkPage('/manifest.webmanifest', 'PWA manifest');
 await checkPage('/sw.js', 'Service worker file');
 
 console.log('\n=== SEARCH TEST ===');
-await page.goto(SITE + '/', { waitUntil: 'networkidle' });
+await recycleIfNeeded();
+await page.goto(SITE + '/', { waitUntil: 'networkidle', timeout: 45000 });
 await page.fill('input[type=search], input[placeholder*="ابحث"]', 'panadol').catch(() => {});
 await page.press('input[type=search], input[placeholder*="ابحث"]', 'Enter').catch(() => {});
 await page.waitForTimeout(3000);
@@ -85,25 +107,27 @@ if (url.includes('search')) {
 } else issues.push(`Search: did not navigate (URL=${url})`);
 
 console.log('\n=== AI ASSISTANT TEST ===');
-await page.goto(SITE + '/assistant', { waitUntil: 'networkidle' });
+await recycleIfNeeded();
+await page.goto(SITE + '/assistant', { waitUntil: 'networkidle', timeout: 45000 });
 await page.screenshot({ path: '/tmp/assistant-page.png' });
 const assistantInput = page.locator('textarea, form input:visible').last();
 if (await assistantInput.count()) {
   await assistantInput.fill('I have a headache, what should I take?').catch(() => {});
   const sendBtn = page.locator('button[type=submit], button:has-text("إرسال"), button:has-text("Send")').last();
   await sendBtn.click().catch(() => {});
-  await page.waitForTimeout(6000);
+  await page.waitForTimeout(12000);
   const body = await page.locator('body').innerText().catch(() => '');
   const hasGraceful = body.includes('غير متاحة') || body.includes('temporarily unavailable');
   const hasChatReply = body.includes('headache') || body.includes('صداع') || body.includes('Panadol') || body.includes('paracetamol');
   if (hasChatReply) ok.push('AI Assistant: got a real reply');
-  else if (hasGraceful) issues.push('AI Assistant: AI unavailable message shown (needs API key on Vercel)');
+  else if (hasGraceful) issues.push('AI Assistant: AI unavailable message shown (all providers failed)');
   else issues.push('AI Assistant: NO reply and NO unavailable message — silent failure');
   await page.screenshot({ path: '/tmp/assistant-after.png' });
 }
 
 console.log('\n=== LANGUAGE TOGGLE TEST ===');
-await page.goto(SITE + '/', { waitUntil: 'networkidle' });
+await recycleIfNeeded();
+await page.goto(SITE + '/', { waitUntil: 'networkidle', timeout: 45000 });
 const before = await page.locator('h1').first().textContent().catch(() => '');
 const langBtn = page.locator('button[aria-label*="تبديل"], button[aria-label*="anguage"], button:has-text("EN")').first();
 await langBtn.click().catch(() => {});
@@ -114,7 +138,7 @@ else issues.push(`Language toggle: h1 unchanged ("${before.slice(0, 40)}")`);
 
 console.log('\n=== MOBILE VIEWPORT TEST ===');
 await page.setViewportSize({ width: 390, height: 844 });
-await page.goto(SITE + '/', { waitUntil: 'networkidle' });
+await page.goto(SITE + '/', { waitUntil: 'networkidle', timeout: 45000 });
 await page.waitForTimeout(2000);
 const hScroll = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2).catch(() => null);
 if (hScroll === true) issues.push('Mobile (390px): horizontal overflow detected');
