@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { getZAI, aiUnavailablePayload } from '@/lib/ai'
+import { chatComplete, aiUnavailablePayload } from '@/lib/ai'
+
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,19 +47,18 @@ PRODUCTS: Product Name 1; Product Name 2
 Available catalog:
 ${catalog}`
 
-    const zai = await getZAI()
-    if (!zai) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
-    const completion = await zai.chat.completions.create({
-      messages: [
+    const result = await chatComplete(
+      [
         { role: 'system', content: system },
         ...history.map((m: { role?: string; content?: string }) => ({
           role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
           content: String(m.content || '').slice(0, 2000),
         })),
       ],
-      thinking: { type: 'disabled' },
-    })
-    let reply = completion.choices[0]?.message?.content || ''
+      { temperature: 0.4, maxTokens: 700 },
+    )
+    if (!result) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
+    let reply = result.content
 
     // parse PRODUCTS: line
     let suggested: string[] = []

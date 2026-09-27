@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getZAI, aiUnavailablePayload } from '@/lib/ai'
+import { chatComplete, aiUnavailablePayload } from '@/lib/ai'
+
+export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,16 +39,15 @@ export async function POST(req: NextRequest) {
 }
 If no known interactions exist, return an empty interactions array and overallRisk "low".`
 
-    const zai = await getZAI()
-    if (!zai) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
-    const completion = await zai.chat.completions.create({
-      messages: [
-        { role: 'assistant', content: system },
+    const result = await chatComplete(
+      [
+        { role: 'system', content: system },
         { role: 'user', content: `Medications to analyze: ${meds.join(', ')}` },
       ],
-      thinking: { type: 'disabled' },
-    })
-    let raw = completion.choices[0]?.message?.content || ''
+      { temperature: 0.15, maxTokens: 900 },
+    )
+    if (!result) return NextResponse.json(aiUnavailablePayload(lang), { status: 503 })
+    let raw = result.content
     // strip possible markdown fences
     raw = raw.replace(/```json\s*/i, '').replace(/```\s*$/, '').trim()
 

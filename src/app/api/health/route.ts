@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getZAI } from "@/lib/ai";
+import { getZAI, getAIStatus } from "@/lib/ai";
 import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
@@ -44,11 +44,11 @@ export async function GET() {
       categories: categoryCount,
     },
     ai: {
-      enabled: zai !== null,
+      ...getAIStatus(zai !== null),
       note:
         zai !== null
-          ? "AI features are active (assistant, prescription reader, drug interactions)."
-          : "AI routes return 503 with a friendly message. Enable by setting ZAI_API_KEY (+ optional ZAI_BASE_URL) in the environment.",
+          ? "AI features are active via the GLM SDK (assistant, prescription reader, drug interactions), with a keyless free-model pool as fallback."
+          : "AI features are active via the keyless free-model pool (Pollinations / Kilo / LLM7 — no credentials needed). Set ZAI_API_KEY to prefer GLM.",
     },
     email: {
       enabled: Boolean(process.env.RESEND_API_KEY),

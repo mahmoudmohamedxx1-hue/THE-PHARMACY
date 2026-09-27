@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
-import { getZAI, aiUnavailablePayload } from '@/lib/ai'
+import { visionComplete, aiUnavailablePayload } from '@/lib/ai'
+
+export const maxDuration = 60
 
 // ---- fuzzy medicine-to-product matching ----
 function norm(s: string): string[] {
@@ -61,28 +63,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'image_too_large' }, { status: 413 })
     }
 
-    // 1) VLM reads the prescription
-    const zai = await getZAI()
-    if (!zai) return NextResponse.json(aiUnavailablePayload(lang ?? 'ar'), { status: 503 })
-    // SDK type demands `model`, but the vision endpoint selects its default
-    // vision model when the field is omitted (verified working in E2E) —
-    // cast keeps the wire payload identical to production behavior.
-    const completion = await zai.chat.completions.createVision({
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'You are a pharmacist assistant reading a prescription image. Extract ALL medication names with their dosage and frequency if visible. Respond in this exact format (plain text, no extra commentary):\nMEDICATIONS: name1; name2; name3\nDOSAGES: dose info per medication separated by ;\nNOTES: any doctor instructions or patient details visible',
-            },
-            { type: 'image_url', image_url: { url: dataUrl } },
-          ],
-        },
-      ],
-      thinking: { type: 'disabled' },
-    } as Parameters<typeof zai.chat.completions.createVision>[0])
-    const extracted = completion.choices[0]?.message?.content || ''
+    // 1) VLM reads the prescription (ZAI vision, then keyless Qwen2.5-VL)
+    const result = await visionComplete(
+      'You are a pharmacist assistant reading a prescription image. Extract ALL medication names with their dosage and frequency if visible. Respond in this exact format (plain text, no extra commentary):\nMEDICATIONS: name1; name2; name3\nDOSAGES: dose info per medication separated by ;\nNOTES: any doctor instructions or patient details visible',
+      dataUrl,
+    )
+    if (!result) return NextResponse.json(aiUnavailablePayload(lang ?? 'ar'), { status: 503 })
+    const extracted = result.content
 
     // 2) parse medication names
     const medsLine = extracted.split('\n').find((l) => l.toLowerCase().startsWith('medications:')) || ''

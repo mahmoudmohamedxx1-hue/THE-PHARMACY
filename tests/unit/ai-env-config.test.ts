@@ -61,7 +61,7 @@ describe("aiUnavailablePayload()", () => {
   test("english message by default", () => {
     const p = aiUnavailablePayload();
     expect(p.error).toBe("ai_unavailable");
-    expect(p.message).toContain("ZAI_API_KEY");
+    expect(p.message).toContain("temporarily unavailable");
   });
 
   test("isAiUnavailableResponse matches only the 503 ai_unavailable shape", () => {
