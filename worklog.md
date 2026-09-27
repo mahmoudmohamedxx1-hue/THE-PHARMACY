@@ -410,3 +410,29 @@ Stage Summary:
 - Commit c4a0a76 pushed & live: SEO/OG/sitemap/robots fixed, AI env-var config added, /api/health added, unit tests committed
 - QA scripts committed: scripts/site-sweep.mjs, scripts/image-audit-all.mjs, scripts/test-prescription-flow.mjs
 - agent-browser eval is unreliable in this sandbox — use direct playwright-core scripts (chromium at /home/z/.agent-browser/browsers/chrome-153.0.8010.47/chrome)
+
+---
+Task ID: 15
+Agent: Super Z (main agent)
+Task: Keyless AI integration (GLM SDK glm-5.3-flash + freellmpool pool) + fix remaining live bugs
+
+Work Log:
+- Investigated github.com/0xzr/freellmpool: audited catalog of keyless OpenAI-compatible providers (Pollinations, Kilo Gateway, LLM7, OVHcloud AI Endpoints)
+- Verified providers live from sandbox: Pollinations openai-fast OK (~7s), Kilo stepfun/step-3.7-flash:free OK (~3s), Kilo openrouter/free OK (~7s, also reads images), LLM7 default OK (~0.8s, 60 req/day), OVH 429
+- Verified ZAI SDK keyless in sandbox; model name glm-5.3-flash accepted (served as glm-4-plus)
+- Refactored src/lib/ai.ts: unified chatComplete()/visionComplete() provider chain — ZAI SDK first (keyless sandbox / ZAI_API_KEY elsewhere, ZAI_MODEL env default glm-5.3-flash, retry without model on rejection), then keyless pool (Pollinations -> Kilo -> LLM7) with sticky routing, 60s failure cooldowns, null-content guard for reasoning models; vision chain: ZAI createVision -> Kilo openrouter/free (verified reading real prescriptions) -> OVH Qwen2.5-VL best-effort
+- Updated routes: assistant/interactions/prescriptions use the chain (maxDuration=60); /api/health reports ai mode zai|keyless-pool|off + providers
+- Added 12 unit tests (tests/unit/ai-provider-chain.test.ts) with deterministic ZAI factory injection; 27/27 unit tests green; tsc clean
+- E2E verified locally: assistant bilingual replies with product cards, interactions JSON analysis, prescription OCR (Panadol Extra/Augmentin/Ventolin extracted + catalog matched)
+- SEO bug hunt: discovered the whole site used div/button+onClick with ZERO <a> links — crawlers could not follow any internal link. Converted ProductCard (outer anchor, inner buttons preventDefault), Header (logo/category nav/suggestions/account menu/wishlist), Footer quick links, HomeView (hero CTAs/feature cards/brand chips/category tiles/AI cards/view-all), CartDrawer + AssistantView product links, Category/ProductView breadcrumbs to next/link
+- Homepage went from 0 to 40+ crawlable links; search page from 0 to 6 product links
+- Added og:url to product + category openGraph metadata
+- Fixed test scripts: mangled selectors (aref*= -> a[href*=]), assistant input selector (form input:visible — shadcn inputs carry no type attr), 404 helper, correct slugs (skin-care) and manifest path (manifest.webmanifest), benign _rsc prefetch filtering, browser-context recycling every 8 pages (fixes OOM crash on live sweeps)
+- E2E core flows verified: add-to-cart (badge=1), cart page shows exact item, wishlist toggle works, checkout shows item + form, register logs in (account page shows name/email, header account menu works), orders page renders, 404 correct, language toggle works, mobile 390px no overflow
+- Pushed 3 commits (c6de8b8, 6ae5e92, 3569460) via user PAT; Vercel redeployed
+
+Stage Summary:
+- LIVE https://the-pharmacy-two.vercel.app: AI fully keyless — health shows ai.mode=keyless-pool (pollinations/kilo/llm7); assistant + interactions + prescription OCR (200 with full med extraction) all work with ZERO configuration
+- Live sweep: 24/24 checks pass, zero issues — all pages 200, no broken images, no console/page errors, no failed requests, mobile no overflow
+- Keyless pool can be disabled with FREE_LLM_POOL=off; ZAI_API_KEY still preferred when present
+- 496 products crawlable via internal links; og:url + canonical correct on live
