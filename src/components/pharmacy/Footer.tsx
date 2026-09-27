@@ -1,7 +1,8 @@
 'use client'
+import Link from 'next/link'
 import { Cross, Mail, Phone, MapPin, Sparkles, Heart, ShieldCheck, MessageCircle } from 'lucide-react'
 import { useLang } from './LangContext'
-import { go } from '@/lib/router'
+
 import { InstallAppButton } from './InstallAppButton'
 
 // Real support channels are deployment-specific — expose them as build-time
@@ -36,11 +37,11 @@ export function Footer() {
         <div>
           <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">{t('quick_links')}</h3>
           <div className="flex flex-col gap-2.5 text-sm">
-            <button onClick={() => go('/')} className="hover:text-primary transition-colors text-start">{lang === 'ar' ? 'الرئيسية' : 'Home'}</button>
-            <button onClick={() => go('/prescription')} className="hover:text-primary transition-colors text-start">{t('ai_rx_title')}</button>
-            <button onClick={() => go('/assistant')} className="hover:text-primary transition-colors text-start">{t('ai_chat_title')}</button>
-            <button onClick={() => go('/interactions')} className="hover:text-primary transition-colors text-start">{t('ai_ddi_title')}</button>
-            <button onClick={() => go('/orders')} className="hover:text-primary transition-colors text-start">{t('my_orders')}</button>
+            <Link href="/" className="hover:text-primary transition-colors text-start">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
+            <Link href="/prescription" className="hover:text-primary transition-colors text-start">{t('ai_rx_title')}</Link>
+            <Link href="/assistant" className="hover:text-primary transition-colors text-start">{t('ai_chat_title')}</Link>
+            <Link href="/interactions" className="hover:text-primary transition-colors text-start">{t('ai_ddi_title')}</Link>
+            <Link href="/orders" className="hover:text-primary transition-colors text-start">{t('my_orders')}</Link>
             <InstallAppButton variant="footer" />
           </div>
         </div>

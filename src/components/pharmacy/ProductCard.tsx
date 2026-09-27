@@ -1,13 +1,11 @@
 'use client'
-import { useState } from 'react'
-import { Card } from '@/components/ui/card'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Star, ShoppingCart, Heart, FileText } from 'lucide-react'
 import { useCart, useWishlist } from '@/lib/store'
 import { useLang } from './LangContext'
 import { ProductImage } from './ProductImage'
-import { go } from '@/lib/router'
 import { useToast } from '@/hooks/use-toast'
 import type { Lang } from '@/lib/i18n'
 
@@ -34,6 +32,7 @@ export function ProductCard({ p, eager = false }: { p: P; eager?: boolean }) {
     ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0
 
   const onAdd = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
     if (p.stock <= 0) return
     add({
@@ -45,6 +44,7 @@ export function ProductCard({ p, eager = false }: { p: P; eager?: boolean }) {
   }
 
   const onWish = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
     const addedNow = wishlist.toggle(p.id)
     toast({ description: addedNow
@@ -53,9 +53,10 @@ export function ProductCard({ p, eager = false }: { p: P; eager?: boolean }) {
   }
 
   return (
-    <Card
-      onClick={() => go(`/p/${p.slug}`)}
-      className="group relative cursor-pointer rounded-2xl border-border/60 bg-card overflow-hidden shadow-[0_1px_2px_rgba(16,40,55,0.04)] hover:border-primary/35 hover:shadow-[0_14px_36px_-14px_rgba(13,148,136,0.3)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col p-0 gap-0"
+    <Link
+      href={`/product/${p.slug}`}
+      aria-label={name}
+      className="group relative flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[0_1px_2px_rgba(16,40,55,0.04)] hover:border-primary/35 hover:shadow-[0_14px_36px_-14px_rgba(13,148,136,0.3)] hover:-translate-y-0.5 transition-all duration-300 p-0 gap-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
     >
       {/* image */}
       <div className="relative p-2.5 pb-0 sm:p-3 sm:pb-0">
@@ -133,6 +134,6 @@ export function ProductCard({ p, eager = false }: { p: P; eager?: boolean }) {
           </Button>
         </div>
       </div>
-    </Card>
+    </Link>
   )
 }

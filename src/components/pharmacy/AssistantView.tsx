@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -97,13 +98,13 @@ export function AssistantView() {
                     <div className="grid sm:grid-cols-2 gap-2">
                       {m.products.map((p: any) => (
                         <div key={p.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border hover:border-primary/40 transition-colors">
-                          <button onClick={() => go(`/p/${p.slug}`)} className="shrink-0" aria-label={t('a11y_view_product')}>
+                          <Link href={`/product/${p.slug}`} className="shrink-0" aria-label={t('a11y_view_product')}>
                             <ProductImage slug={p.slug} category="pill" brand={p.brand || ''} imageUrl={p.imageUrl} alt={lang === 'ar' ? p.nameAr : p.nameEn} className="w-14 h-14 rounded-lg" rounded="rounded-lg" sizes="56px" />
-                          </button>
+                          </Link>
                           <div className="flex-1 min-w-0">
-                            <button onClick={() => go(`/p/${p.slug}`)} className="text-start">
+                            <Link href={`/product/${p.slug}`} className="text-start">
                               <p className="text-xs font-bold line-clamp-1 hover:text-primary transition-colors">{lang === 'ar' ? p.nameAr : p.nameEn}</p>
-                            </button>
+                            </Link>
                             <span className="text-xs font-black text-primary">{fmtPrice(p.price, lang)}</span>
                           </div>
                           <Button

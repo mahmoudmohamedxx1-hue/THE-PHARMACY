@@ -300,7 +300,46 @@ export async function visionComplete(
   }
 
   if (!keylessPoolEnabled()) return null;
-  // Keyless vision fallback: OVHcloud AI Endpoints expose a keyless
+
+  // Keyless vision fallback #1: Kilo Gateway — its pooled free models accept
+  // OpenAI-style image_url content (verified working keyless).
+  try {
+    const res = await fetch(
+      "https://api.kilo.ai/api/gateway/chat/completions",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openrouter/free",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text },
+                { type: "image_url", image_url: { url: imageDataUrl } },
+              ],
+            },
+          ],
+          max_tokens: 2048,
+          temperature: 0.1,
+        }),
+        signal: AbortSignal.timeout(30000),
+      },
+    );
+    if (res.ok) {
+      const data: unknown = await res.json();
+      const content =
+        (data as { choices?: { message?: { content?: unknown } }[] })
+          ?.choices?.[0]?.message?.content;
+      if (typeof content === "string" && content.trim().length > 0) {
+        return { content, provider: "kilo-vision" };
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  // Keyless vision fallback #2: OVHcloud AI Endpoints expose a keyless
   // OpenAI-compatible route with Qwen2.5-VL-72B. Best effort — some networks
   // rate-limit it (429); on failure the caller degrades gracefully.
   try {

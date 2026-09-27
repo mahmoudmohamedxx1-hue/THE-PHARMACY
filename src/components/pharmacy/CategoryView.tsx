@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -128,7 +129,7 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
     <div className="max-w-7xl mx-auto w-full px-4 lg:px-6 py-8">
       {/* breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4" aria-label={t('a11y_breadcrumb')}>
-        <button onClick={() => go('/')} className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</button>
+        <Link href="/" className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
         <ChevronRight className="w-3 h-3 flip-x rtl:rotate-180" />
         <span className="font-semibold text-foreground">
           {searchQuery ? `${t('search_results_for')} "${searchQuery}"` : (lang === 'ar' ? category?.nameAr : category?.nameEn) || ''}

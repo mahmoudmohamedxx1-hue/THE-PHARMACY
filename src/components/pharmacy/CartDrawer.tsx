@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -45,15 +46,15 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
               {items.map((i) => (
                 <div key={i.productId} className="flex gap-3 p-3 rounded-2xl border bg-card hover:border-primary/30 transition-colors">
-                  <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="shrink-0" aria-label={t('a11y_view_product')}>
+                  <Link href={`/product/${i.slug}`} onClick={() => close()} className="shrink-0" aria-label={t('a11y_view_product')}>
                     <ProductImage slug={i.slug} category="pill" brand="" imageUrl={i.imageUrl} alt={lang === 'ar' ? i.nameAr : i.nameEn} className="w-20 h-20 rounded-xl border-border/50" rounded="rounded-xl" sizes="80px" />
-                  </button>
+                  </Link>
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
-                    <button onClick={() => { close(); go(`/p/${i.slug}`) }} className="text-start">
+                    <Link href={`/product/${i.slug}`} onClick={() => close()} className="text-start">
                       <p className="text-sm font-semibold line-clamp-2 hover:text-primary transition-colors">
                         {lang === 'ar' ? i.nameAr : i.nameEn}
                       </p>
-                    </button>
+                    </Link>
                     <span className="text-sm font-extrabold text-primary">{fmtPrice(i.price, lang)}</span>
                     {i.prescriptionRequired && (
                       <span className="text-[10px] font-bold text-amber-700 bg-amber-100 w-fit px-2 py-0.5 rounded-full">

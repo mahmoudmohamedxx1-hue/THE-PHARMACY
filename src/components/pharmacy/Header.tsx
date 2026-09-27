@@ -8,6 +8,7 @@ import { Cross, Search, ShoppingCart, User, Menu, LogOut, Package, LayoutDashboa
 import { useCart, useWishlist } from '@/lib/store'
 import { useLang } from './LangContext'
 import { go } from '@/lib/router'
+import Link from 'next/link'
 import { useToast } from '@/hooks/use-toast'
 import { fmtPrice } from './ProductCard'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -89,7 +90,7 @@ export function Header({ categories }: { categories: Cat[] }) {
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="flex items-center gap-3 h-16">
           {/* logo */}
-          <button onClick={() => go('/')} className="flex items-center gap-2.5 shrink-0 group" aria-label={t('a11y_home')}>
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label={t('a11y_home')}>
             <span className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-primary text-primary-foreground shadow-md group-hover:scale-105 transition-transform">
               <Cross className="w-5 h-5" strokeWidth={2.6} />
             </span>
@@ -97,7 +98,7 @@ export function Header({ categories }: { categories: Cat[] }) {
               <span className="font-black text-lg tracking-tight text-foreground">{t('brand')}</span>
               <span className="text-[10px] font-semibold text-primary/70">{t('tagline')}</span>
             </span>
-          </button>
+          </Link>
 
           {/* search */}
           <div ref={boxRef} className="relative flex-1 max-w-xl mx-auto hidden md:block">
@@ -115,9 +116,10 @@ export function Header({ categories }: { categories: Cat[] }) {
             {showSugg && suggestions.length > 0 && (
               <div className="absolute top-full mt-2 w-full bg-white rounded-2xl border shadow-xl overflow-hidden z-50">
                 {suggestions.map((s) => (
-                  <button
+                  <Link
                     key={s.id}
-                    onClick={() => { setShowSugg(false); go(`/p/${s.slug}`) }}
+                    href={`/product/${s.slug}`}
+                    onClick={() => setShowSugg(false)}
                     className="w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-accent/60 text-start transition-colors"
                   >
                     <span className="w-10 h-10 rounded-lg bg-muted/50 border border-border/40 overflow-hidden flex items-center justify-center shrink-0">
@@ -132,7 +134,7 @@ export function Header({ categories }: { categories: Cat[] }) {
                       <span className="block text-[11px] text-muted-foreground">{s.brand}</span>
                     </span>
                     <span className="text-xs font-bold text-primary shrink-0">{fmtPrice(s.price, lang)}</span>
-                  </button>
+                  </Link>
                 ))}
                 <button
                   onClick={() => doSearch()}
@@ -171,16 +173,16 @@ export function Header({ categories }: { categories: Cat[] }) {
                       <p className="text-sm font-bold truncate">{user.name || user.email}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
                     </div>
-                    <button onClick={() => go('/orders')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium transition-colors">
+                    <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium transition-colors">
                       <Package className="w-4 h-4" /> {t('my_orders')}
-                    </button>
-                    <button onClick={() => go('/account')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium transition-colors">
+                    </Link>
+                    <Link href="/account" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium transition-colors">
                       <User className="w-4 h-4" /> {t('account')}
-                    </button>
+                    </Link>
                     {user.isAdmin && (
-                      <button onClick={() => go('/admin')} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium text-primary transition-colors">
+                      <Link href="/admin" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-accent/60 text-sm font-medium text-primary transition-colors">
                         <LayoutDashboard className="w-4 h-4" /> {t('admin_panel')}
-                      </button>
+                      </Link>
                     )}
                     <button onClick={onLogout} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-red-50 text-sm font-medium text-red-600 transition-colors">
                       <LogOut className="w-4 h-4" /> {t('logout')}
@@ -188,26 +190,26 @@ export function Header({ categories }: { categories: Cat[] }) {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1">
-                    <button onClick={() => go('/login')} className="w-full text-sm font-semibold px-3 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                    <Link href="/login" className="w-full text-sm font-semibold px-3 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-center">
                       {t('login')}
-                    </button>
-                    <button onClick={() => go('/register')} className="w-full text-sm font-medium px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-colors">
+                    </Link>
+                    <Link href="/register" className="w-full text-sm font-medium px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-colors text-center">
                       {t('register')}
-                    </button>
+                    </Link>
                   </div>
                 )}
               </PopoverContent>
             </Popover>
 
             {/* wishlist */}
-            <Button variant="ghost" size="icon" onClick={() => go('/wishlist')} className="relative rounded-xl h-10" aria-label={t('wishlist')}>
+            <Link href="/wishlist" className="relative rounded-xl h-10 w-10 inline-flex items-center justify-center transition-colors hover:bg-accent hover:text-accent-foreground" aria-label={t('wishlist')}>
               <Heart className="w-5 h-5" />
               {wishCount > 0 && (
                 <Badge className="absolute -top-1 -end-1 h-5 min-w-5 px-1.5 text-[10px] font-bold bg-red-500 hover:bg-red-500 flex items-center justify-center">
                   {wishCount}
                 </Badge>
               )}
-            </Button>
+            </Link>
 
             {/* cart */}
             <Button variant="ghost" size="icon" onClick={openCart} className="relative rounded-xl h-10" aria-label={t('cart')}>
@@ -244,24 +246,25 @@ export function Header({ categories }: { categories: Cat[] }) {
                     <Input name="q" placeholder={t('search_placeholder')} className="rounded-xl" />
                   </form>
                   {categories.map((c) => (
-                    <button
+                    <Link
                       key={c.slug}
-                      onClick={() => { setMenuOpen(false); go(`/c/${c.slug}`) }}
+                      href={`/category/${c.slug}`}
+                      onClick={() => setMenuOpen(false)}
                       className="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-medium transition-colors"
                     >
                       <span>{lang === 'ar' ? c.nameAr : c.nameEn}</span>
                       <Badge variant="secondary" className="text-[10px]">{c.productCount}</Badge>
-                    </button>
+                    </Link>
                   ))}
-                  <button onClick={() => { setMenuOpen(false); go('/prescription') }} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
+                  <Link href="/prescription" onClick={() => setMenuOpen(false)} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
                     <Sparkles className="w-4 h-4" /> {t('ai_rx_title')}
-                  </button>
-                  <button onClick={() => { setMenuOpen(false); go('/assistant') }} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
+                  </Link>
+                  <Link href="/assistant" onClick={() => setMenuOpen(false)} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
                     <Sparkles className="w-4 h-4" /> {t('ai_chat_title')}
-                  </button>
-                  <button onClick={() => { setMenuOpen(false); go('/interactions') }} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
+                  </Link>
+                  <Link href="/interactions" onClick={() => setMenuOpen(false)} className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl hover:bg-accent/60 text-sm font-semibold text-primary transition-colors">
                     <Heart className="w-4 h-4" /> {t('ai_ddi_title')}
-                  </button>
+                  </Link>
                   <div className="my-2 border-t" />
                   <InstallAppButton />
                 </div>
@@ -287,27 +290,27 @@ export function Header({ categories }: { categories: Cat[] }) {
         {/* desktop category nav */}
         <nav className="hidden md:flex items-center gap-0.5 pb-2 overflow-x-auto" aria-label={t('all_categories')}>
           {categories.map((c) => (
-            <button
+            <Link
               key={c.slug}
-              onClick={() => go(`/c/${c.slug}`)}
+              href={`/category/${c.slug}`}
               className="px-3 py-1.5 rounded-full text-[13px] font-semibold text-muted-foreground hover:text-primary hover:bg-accent/60 whitespace-nowrap transition-colors"
             >
               {lang === 'ar' ? c.nameAr : c.nameEn}
-            </button>
+            </Link>
           ))}
           <span className="w-px h-4 bg-border mx-1.5" />
-          <button
-            onClick={() => go('/prescription')}
+          <Link
+            href="/prescription"
             className="px-3 py-1.5 rounded-full text-[13px] font-bold text-primary hover:bg-primary/10 whitespace-nowrap inline-flex items-center gap-1.5 transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5" /> {t('ai_rx_title')}
-          </button>
-          <button
-            onClick={() => go('/assistant')}
+          </Link>
+          <Link
+            href="/assistant"
             className="px-3 py-1.5 rounded-full text-[13px] font-bold text-primary hover:bg-primary/10 whitespace-nowrap inline-flex items-center gap-1.5 transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5" /> {t('ai_chat_title')}
-          </button>
+          </Link>
         </nav>
       </div>
     </header>

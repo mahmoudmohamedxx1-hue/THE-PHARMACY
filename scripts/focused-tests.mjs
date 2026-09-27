@@ -38,7 +38,7 @@ await page.screenshot({ path: '/tmp/search-panadol.png' });
 
 console.log('=== 3. AI ASSISTANT UX ===');
 await page.goto(SITE + '/assistant', { waitUntil: 'networkidle', timeout: 45000 });
-const textarea = page.locator('textarea').first();
+const textarea = page.locator('form input:visible').last();
 if (await textarea.count()) {
   await textarea.fill('I have a headache');
   await textarea.press('Enter');

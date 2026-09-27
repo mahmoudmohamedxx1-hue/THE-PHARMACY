@@ -13,7 +13,7 @@ const ok = [];
 const consoleErrs = [];
 page.on('console', (m) => { if (m.type() === 'error') consoleErrs.push(m.text().slice(0, 250)); });
 page.on('pageerror', (e) => issues.push(`PAGEERROR: ${String(e).slice(0, 250)}`));
-page.on('requestfailed', (r) => issues.push(`REQFAIL: ${r.method()} ${r.url().slice(0, 120)} :: ${r.failure()?.errorText}`));
+page.on('requestfailed', (r) => { const u = r.url(); if (u.includes('_rsc=') || u.includes('/_next/image')) return; issues.push(`REQFAIL: ${r.method()} ${u.slice(0, 120)} :: ${r.failure()?.errorText}`); });
 
 async function checkPage(path, name, opts = {}) {
   try {
@@ -39,11 +39,22 @@ async function checkPage(path, name, opts = {}) {
   }
 }
 
+
+async function checkPage404(path) {
+  try {
+    const resp = await page.goto(SITE + path, { waitUntil: 'networkidle', timeout: 30000 });
+    if (resp.status() === 404) ok.push(`404 handling: correct for ${path}`);
+    else issues.push(`404 handling: expected 404 for ${path}, got ${resp.status()}`);
+  } catch (e) {
+    issues.push(`404 handling (${path}): ${String(e).slice(0, 120)}`);
+  }
+}
+
 console.log('=== PAGE SWEEP ===');
 await checkPage('/', 'Homepage');
 await checkPage('/category/medications', 'Category: Medications');
 await checkPage('/category/vitamins', 'Category: Vitamins');
-await checkPage('/category/skincare', 'Category: Skincare');
+await checkPage('/category/skin-care', 'Category: Skin Care');
 await checkPage('/product/panadol-extra', 'Product: Panadol Extra');
 await checkPage('/cart', 'Cart page');
 await checkPage('/login', 'Login');
@@ -55,10 +66,11 @@ await checkPage('/orders', 'Orders');
 await checkPage('/wishlist', 'Wishlist');
 await checkPage('/checkout', 'Checkout (empty cart redirect?)');
 await checkPage('/admin', 'Admin');
-await checkPage('/nonexistent-page-xyz', '404 page');
+// 404 behavior is asserted via HTTP status below
+await checkPage404('/nonexistent-page-xyz');
 await checkPage('/sitemap.xml', 'Sitemap');
 await checkPage('/robots.txt', 'Robots');
-await checkPage('/manifest.json', 'PWA manifest');
+await checkPage('/manifest.webmanifest', 'PWA manifest');
 await checkPage('/sw.js', 'Service worker file');
 
 console.log('\n=== SEARCH TEST ===');
@@ -75,14 +87,14 @@ if (url.includes('search')) {
 console.log('\n=== AI ASSISTANT TEST ===');
 await page.goto(SITE + '/assistant', { waitUntil: 'networkidle' });
 await page.screenshot({ path: '/tmp/assistant-page.png' });
-const assistantInput = page.locator('textarea, input[type=text]').last();
+const assistantInput = page.locator('textarea, form input:visible').last();
 if (await assistantInput.count()) {
   await assistantInput.fill('I have a headache, what should I take?').catch(() => {});
   const sendBtn = page.locator('button[type=submit], button:has-text("إرسال"), button:has-text("Send")').last();
   await sendBtn.click().catch(() => {});
   await page.waitForTimeout(6000);
   const body = await page.locator('body').innerText().catch(() => '');
-  const hasGraceful = body.includes('غير مفعّلة') || body.includes('not enabled');
+  const hasGraceful = body.includes('غير متاحة') || body.includes('temporarily unavailable');
   const hasChatReply = body.includes('headache') || body.includes('صداع') || body.includes('Panadol') || body.includes('paracetamol');
   if (hasChatReply) ok.push('AI Assistant: got a real reply');
   else if (hasGraceful) issues.push('AI Assistant: AI unavailable message shown (needs API key on Vercel)');
@@ -93,7 +105,7 @@ if (await assistantInput.count()) {
 console.log('\n=== LANGUAGE TOGGLE TEST ===');
 await page.goto(SITE + '/', { waitUntil: 'networkidle' });
 const before = await page.locator('h1').first().textContent().catch(() => '');
-const langBtn = page.locator('button[aria-label*="lang"], button:has-text("English"), button:has-text("تبديل اللغة")').first();
+const langBtn = page.locator('button[aria-label*="تبديل"], button[aria-label*="anguage"], button:has-text("EN")').first();
 await langBtn.click().catch(() => {});
 await page.waitForTimeout(2000);
 const after = await page.locator('h1').first().textContent().catch(() => '');

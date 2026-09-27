@@ -1,7 +1,7 @@
 'use client'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { Pill, Zap, Sparkles, Waves, Baby, Droplets, Palette, Stethoscope, Heart, PawPrint, ScanText, MessageCircleHeart, ShieldAlert, ArrowRight, Truck, BadgeCheck, Cross, Clock } from 'lucide-react'
 import { useLang } from './LangContext'
 import { useCategories, useProducts, useProductsByIds, type Product } from './hooks'
@@ -80,12 +80,12 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">{t('hero_sub')}</p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button size="lg" onClick={() => go('/c/medications')} className="rounded-2xl h-12 px-7 text-base font-bold gap-2 shadow-lg shadow-primary/25">
+              <Link href="/category/medications" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl h-12 px-7 text-base font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-colors">
                 {t('hero_cta_shop')} <ArrowRight className="w-4 h-4 flip-x rtl:rotate-180" />
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => go('/prescription')} className="rounded-2xl h-12 px-7 text-base font-bold gap-2 border-primary/40 text-primary hover:bg-primary/5 hover:text-primary">
+              </Link>
+              <Link href="/prescription" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl h-12 px-7 text-base font-bold border border-primary/40 bg-transparent text-primary hover:bg-primary/5 hover:text-primary transition-colors">
                 <ScanText className="w-5 h-5" /> {t('hero_cta_rx')}
-              </Button>
+              </Link>
             </div>
             <div className="flex items-center gap-5 pt-4 text-sm">
               <span className="flex flex-col">
@@ -118,7 +118,7 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.15 * i, duration: 0.5 }}
               >
-                <Card className="p-5 flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer" onClick={() => go(['/prescription', '/assistant', '/interactions'][i])}>
+                <Link href={['/prescription', '/assistant', '/interactions'][i]} className="p-5 flex items-center gap-4 hover:shadow-lg hover:border-primary/30 transition-all bg-card rounded-2xl border shadow-sm">
                   <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${f.color}`}>
                     <f.icon className="w-6 h-6" />
                   </span>
@@ -127,7 +127,7 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
                     <p className="text-sm text-muted-foreground leading-snug">{f.desc}</p>
                   </div>
                   <ArrowRight className="w-4 h-4 ms-auto shrink-0 text-muted-foreground flip-x rtl:rotate-180" />
-                </Card>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -143,14 +143,14 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
           </motion.div>
           <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-1 px-1 tp-scroll">
             {topBrands.map((b) => (
-              <button
+              <Link
                 key={b.brand}
-                onClick={() => go(`/search/${encodeURIComponent(b.brand)}`)}
+                href={`/search/${encodeURIComponent(b.brand)}`}
                 className="shrink-0 px-4 h-10 rounded-full border bg-card hover:border-primary/50 hover:text-primary hover:shadow-sm transition-all text-sm font-bold flex items-center gap-2"
               >
                 {b.brand}
                 <span className="text-[10px] font-semibold text-muted-foreground bg-muted rounded-full px-1.5 py-0.5">{b.count}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </section>
@@ -180,13 +180,15 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
           {categories.map((c, i) => {
             const Icon = CAT_ICONS[SLUG_ICON[c.slug]] || Pill
             return (
-              <motion.button
+              <motion.div
                 key={c.slug}
                 initial={{ opacity: 0, scale: 0.94 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.04, duration: 0.35 }}
-                onClick={() => go(`/c/${c.slug}`)}
+              >
+              <Link
+                href={`/category/${c.slug}`}
                 className="group relative flex flex-col items-center gap-2.5 p-4 pt-3 rounded-3xl border border-border/60 bg-card overflow-hidden hover:border-primary/40 hover:shadow-[0_12px_32px_-14px_rgba(13,148,136,0.3)] hover:-translate-y-0.5 transition-all"
               >
                 {/* real product photo as tile backdrop */}
@@ -211,7 +213,8 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
                 </span>
                 <span className="text-[13px] font-bold text-center leading-tight">{lang === 'ar' ? c.nameAr : c.nameEn}</span>
                 <span className="text-[11px] text-muted-foreground -mt-1.5">{c.productCount} {lang === 'ar' ? 'منتج' : 'items'}</span>
-              </motion.button>
+              </Link>
+              </motion.div>
             )
           })}
         </div>
@@ -224,9 +227,9 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{t('featured_products')}</h2>
             <p className="text-sm text-muted-foreground mt-1">{t('featured_sub')}</p>
           </div>
-          <Button variant="ghost" onClick={() => go('/c/medications')} className="text-primary font-bold gap-1.5">
+          <Link href="/category/medications" className="inline-flex items-center gap-1.5 text-primary font-bold px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">
             {t('view_all')} <ArrowRight className="w-4 h-4 flip-x rtl:rotate-180" />
-          </Button>
+          </Link>
         </motion.div>
         <div className="h-4" />
         {featuredItems.length === 0 ? (
@@ -276,7 +279,7 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
               { icon: MessageCircleHeart, title: t('ai_chat_title'), desc: t('ai_chat_desc'), to: '/assistant' },
               { icon: ShieldAlert, title: t('ai_ddi_title'), desc: t('ai_ddi_desc'), to: '/interactions' },
             ].map((f) => (
-              <button key={f.to} onClick={() => go(f.to)} className="group flex flex-col gap-3 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/50 text-start transition-all backdrop-blur">
+              <Link key={f.to} href={f.to} className="group flex flex-col gap-3 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/50 text-start transition-all backdrop-blur">
                 <span className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                   <f.icon className="w-6 h-6 text-white" />
                 </span>
@@ -285,7 +288,7 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
                 <span className="mt-auto text-sm font-bold text-primary inline-flex items-center gap-1.5 pt-2">
                   {t('try_now')} <ArrowRight className="w-4 h-4 flip-x rtl:rotate-180" />
                 </span>
-              </button>
+              </Link>
             ))}
           </div>
         </motion.div>

@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -92,11 +93,11 @@ export function ProductView({ slug, initial }: { slug: string; initial?: { produ
   return (
     <div className="max-w-7xl mx-auto w-full px-4 lg:px-6 py-8 pb-16">
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6" aria-label={t('a11y_breadcrumb')}>
-        <button onClick={() => go('/')} className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</button>
+        <Link href="/" className="hover:text-primary transition-colors">{lang === 'ar' ? 'الرئيسية' : 'Home'}</Link>
         <ChevronRight className="w-3 h-3 flip-x rtl:rotate-180" />
-        <button onClick={() => go(`/c/${p.category.slug}`)} className="hover:text-primary transition-colors">
+        <Link href={`/category/${p.category.slug}`} className="hover:text-primary transition-colors">
           {lang === 'ar' ? p.category.nameAr : p.category.nameEn}
-        </button>
+        </Link>
         <ChevronRight className="w-3 h-3 flip-x rtl:rotate-180" />
         <span className="font-semibold text-foreground truncate max-w-[200px]">{name}</span>
       </nav>
