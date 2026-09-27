@@ -436,3 +436,26 @@ Stage Summary:
 - Live sweep: 24/24 checks pass, zero issues — all pages 200, no broken images, no console/page errors, no failed requests, mobile no overflow
 - Keyless pool can be disabled with FREE_LLM_POOL=off; ZAI_API_KEY still preferred when present
 - 496 products crawlable via internal links; og:url + canonical correct on live
+
+---
+Task ID: 16
+Agent: Super Z (main agent)
+Task: "make the left bugs" — deep edge-case bug hunt on live deployment, fix everything found
+
+Work Log:
+- Cleaned dead code: src/components/pharmacy/PharmacyApp.tsx (untracked legacy hash-router, zero imports) + tests/*.sh restore leftovers; restored mode-bit-only script churn
+- Deep API edge-case sweep (54 checks): search (empty/xss/500-char/arabic/limit extremes), products (bad category/sort/page), auth (bad email/weak pw/duplicate/empty), orders (empty items/bad zone/address/phone/unknown product + qty clamping -5->1, 0.7->1, 9999->20 + total math), admin gates (403), AI (empty/12k/GET 405), 404s, OPTIONS, robots/manifest/sw/offline — ALL PASS; qty-clamp test initially failed only because the chosen product had stock=0 (409 out_of_stock is correct behavior)
+- Browser edge sweep: lang toggle works (rtl->ltr, persists after reload, h1 switches), no-results search, cart persistence (localStorage tp-cart survives full reload, badge=1), checkout empty-submit validation, wishlist, admin gate, login error message, mobile 390px (5 pages, no overflow), hydration clean, zero console errors
+- Admin verified live end-to-end: login (admin@thepharmacy.com / Admin@2026), stats, orders list, CSV export (BOM + RFC4180)
+- REAL BUG #1 found: prescription OCR on live returned extractedText "User Safety: safe / Response Safety: safe", 0 medicines. Root cause: Kilo `openrouter/free` now routes to nvidia/nemotron-3.5-content-safety:free (classifier, not vision) — visionComplete accepted any non-empty string. Fixed: new vision chain = ZAI -> race(OVH Qwen2.5-VL with 429-retry/backoff, Kilo nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free [both verified reading a generated Rx image]), plus isSafetyClassifierOutput()/isBareRefusal() sanity guards applied to text AND vision chains (callKeyless, callZAI, visionComplete)
+- REAL BUG #2 found: vision models answering narratively parsed 0 meds; new src/lib/rx-parse.ts (strict MEDICATIONS: line -> markdown bold -> numbered lines) + fixed latent leading-space bug that kept "N. " prefixes; moved out of route.ts (Next validates route exports)
+- REAL BUG #3 found: local build failed "database disk image is malformed" — stale 3.4MB WAL left by sandbox tar-restore corrupted db/custom.db; committed catalog had also accumulated test artifacts (3 bugtest users, 1 test prescription, 130 QA analytics rows from commits c6de8b8..e45fabb). Fixed: restored pristine d895cc5 catalog (496 products/2 users/2 seed orders/54 events, DELETE mode, integrity ok); added scripts/db-hygiene.mjs as prebuild hook (WAL checkpoint + integrity check + git-HEAD self-restore, Vercel-safe no-op)
+- Rebuilt + verified locally: assistant 200 (GLM reply), prescription OCR extracts Panadol Extra/Augmentin/Ventolin with catalog matches 99%/99%/65%, interactions JSON analysis works, 39/39 unit tests, tsc + eslint clean, health lists vision lanes
+- Committed 32463d5 (18 files, +1546)
+- PUSH BLOCKED: no GitHub credentials in this session (PAT was removed from git config after the earlier clone; not in env/gh/ssh). User must push (or provide a PAT) for the vision fix to reach Vercel
+
+Stage Summary:
+- Live text AI (assistant/interactions) + all commerce flows verified healthy
+- Live prescription OCR is the one remaining live bug — fix is committed locally (32463d5), awaiting push
+- Local preview server running the fixed build (start-preview.sh, clean db)
+- QA scripts committed: edge-bug-hunt.mjs, e2e-purchase-full.mjs, probe-vision-providers.mjs + debug suite
