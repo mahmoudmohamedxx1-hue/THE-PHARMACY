@@ -481,3 +481,20 @@ Stage Summary:
 - Every fake-data surface found in DB, i18n copy, and components is now removed or made honest; 3 real UI bugs fixed (mobile overflow, member-since, hero count) + account logout UX
 - Local build verified end-to-end; repo is 3 commits ahead of origin/main awaiting push
 - Audit scripts committed: audit-browser-phase1/phase2/bcd/cde.mjs, verify-fixes.mjs, clean_fake_data_v2.py, final_cleanup.py, debug-overflow-*.mjs
+
+---
+Task ID: 18
+Agent: Super Z (main agent)
+Task: User provided GitHub PAT ("here is the key") — push blocked commits, verify Vercel deployment live
+
+Work Log:
+- Verified PAT via GitHub API (authenticates as repo owner mahmoudmohamedxx1-hue); confirmed token not present in any tracked file or unpushed diff (secret scan clean)
+- Pushed 5 commits (e45fabb..f6c969c) to origin/main with one-shot credentialed URL — token never written to .git/config
+- Vercel auto-deployed in ~60s; wrote scripts/watch-deploy-verify.mjs (polls bundle hash until new build live, then verifies) — detected new deployment, then live checks: 9/9 API-level PASS (496 products, 0 ratings, 0 compareAtPrice anchors, Sudocrem claim softened, categories sum 496, health 200, care@thepharmacy.com / "24/7" / "Most-loved" absent from all 15 shipped JS bundles)
+- Wrote scripts/live-browser-audit.mjs (in-browser user audit of live site): 11/11 PASS — hero 496+, no discount badge / crossed price / fake stars on product page, mobile 375px scrollWidth=375 on category+search+checkout (overflow fixed), assistant real AI reply via /api/ai/assistant (200), zero console errors
+- Investigated 2 initial failures: "461" was inside RSC flight payload <script> only (invisible — check fixed to innerText), assistant selectors fixed to quick-chip/form-input flow
+
+Stage Summary:
+- ALL fixes are now LIVE on https://the-pharmacy-two.vercel.app: fake-data purge, mobile overflow, honest hero count, keyless vision chain, honest claims
+- Local main == origin/main (f6c969c); audit artifacts: watch-deploy-verify.mjs, live-browser-audit.mjs
+- Advised user to rotate the PAT (shared in chat)
