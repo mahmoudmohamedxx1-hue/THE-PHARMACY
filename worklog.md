@@ -498,3 +498,21 @@ Stage Summary:
 - ALL fixes are now LIVE on https://the-pharmacy-two.vercel.app: fake-data purge, mobile overflow, honest hero count, keyless vision chain, honest claims
 - Local main == origin/main (f6c969c); audit artifacts: watch-deploy-verify.mjs, live-browser-audit.mjs
 - Advised user to rotate the PAT (shared in chat)
+
+---
+Task ID: 19
+Agent: Super Z (main agent)
+Task: Round-2 deep audit ("I THINK THERE IS MORE THAN BUG AND FAKE DATA... NEVER LEAVE ANYTHING... AUDIT IN BROWSER... THEN FIX THEM")
+
+Work Log:
+- DB quality deep scan (audit_db_quality2.py): BOM/zero-width chars in 7 products (descEn+descAr, visibly rendered), movelex descEn was entirely Arabic (field swap) + "pain disappears in seconds" claim, clary nameAr trailing English echo, 40 "Not specified/Not visible" junk volumes, fabricated popularity scores 87-99 (98 distinct values, missed by round-1 purge)
+- All 482 local product images verified to exist; 14 no-image products use honest art fallback (OK); "200000 IU" repeat-char flag = false positive
+- CONFIRMED ARCHITECTURAL BUG (live probe): placed real order TP-7334733007 on Vercel — stock decremented 203→202, admin saw it — ~12 min later stock self-restored to 203, order gone, session 403 (ephemeral per-instance SQLite; silent customer data loss). Browser admin flow showed the split-brain: login 200 but admin APIs 403 from a different instance
+- Residual fake data found: default sort "Most popular" + "Top rated" option + home "Best sellers / الأكثر مبيعاً right now" all powered by fabricated popularity with zero sales/reviews
+- FIXES: popularity zeroed (487 rows) + all 9 popularity orderBy sites → createdAt; sort Select reduced to Newest/price (honest); home best-sellers → "New arrivals / وصل حديثاً" (real signal); data quality fixed (movelex proper EN, BOM stripped, clary, junk volumes); stateless HMAC-signed session tokens (v1.) fix login across instances (6 new unit tests: sign/verify/tamper/expiry); admin amber ephemeral-DB warning banner (runtime.ts detects Vercel+bundled SQLite); DEPLOY.md "Durable database" section; SESSION_SECRET documented
+- Unit 45/45, tsc + eslint clean, local browser regression 19/19, live verify 21/21 (incl. signed cookie on live, stateless cross-client verification, ephemeral banner, no BOM, no fake claims, mobile 375px clean)
+- Recovered from a git history hiccup: prebuild-era `commit --amend` rewrote a pushed commit (66b38b0→8344400); rebase + cherry-pick restored the full fix commit as 8a7559f; pushed fast-forward 66b38b0..8a7559f
+
+Stage Summary:
+- Every round-2 finding fixed and verified live on https://the-pharmacy-two.vercel.app
+- Remaining known limitation (documented + surfaced in admin UI): orders on Vercel are ephemeral until a durable DB is connected (DATABASE_URL + prisma provider switch per DEPLOY.md §7); sessions are already instance-safe; emails via RESEND_API_KEY give an out-of-band order copy
