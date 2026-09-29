@@ -75,10 +75,8 @@ export const T = {
   otc_only: { en: 'OTC only', ar: 'بدون روشتة فقط' },
   all: { en: 'All', ar: 'الكل' },
   sort_by: { en: 'Sort by', ar: 'ترتيب حسب' },
-  sort_popular: { en: 'Most popular', ar: 'الأكثر شعبية' },
   sort_price_asc: { en: 'Price: low to high', ar: 'السعر: من الأقل' },
   sort_price_desc: { en: 'Price: high to low', ar: 'السعر: من الأعلى' },
-  sort_rating: { en: 'Top rated', ar: 'الأعلى تقييماً' },
   sort_newest: { en: 'Newest', ar: 'الأحدث' },
   results: { en: 'results', ar: 'نتيجة' },
   no_products: { en: 'No products match your filters', ar: 'لا توجد منتجات مطابقة للفلاتر' },
@@ -225,6 +223,14 @@ export const T = {
   a_search_products: { en: 'Search products…', ar: 'ابحث في المنتجات…' },
   a_featured: { en: 'Featured', ar: 'مميز' },
   admin_forbidden: { en: 'Admin access required', ar: 'مطلوب صلاحية إدارة' },
+  admin_db_warning: {
+    en: 'This deployment stores new data in temporary memory',
+    ar: 'هذا النشر يخزّن البيانات الجديدة في ذاكرة مؤقتة',
+  },
+  admin_db_warning_sub: {
+    en: 'Orders, sessions and analytics placed here are lost when the site redeploys or an instance recycles. Connect a durable database (see DEPLOY.md — “Durable database”) before going live.',
+    ar: 'الطلبات والجلسات والتحليلات هنا تُفقد عند إعادة نشر الموقع أو تبديل الخادم. اربط قاعدة بيانات دائمة (راجع DEPLOY.md — «قاعدة بيانات دائمة») قبل التشغيل الفعلي.',
+  },
 
   // admin analytics + exports
   a_analytics: { en: 'Analytics — last 30 days', ar: 'التحليلات — آخر 30 يوماً' },
@@ -266,7 +272,6 @@ export const T = {
   removed_wishlist: { en: 'Removed from wishlist', ar: 'أُزيل من المفضلة' },
   search_results_for: { en: 'Search results for', ar: 'نتائج البحث عن' },
   no_results: { en: 'No results found', ar: 'لا توجد نتائج' },
-  popular_searches: { en: 'Popular right now', ar: 'الأكثر بحثاً الآن' },
   product_of: { en: 'of', ar: 'من' },
   back: { en: 'Back', ar: 'رجوع' },
   how_it_works: { en: 'How it works', ar: 'كيف يعمل' },
@@ -290,8 +295,8 @@ export const T = {
   delivery_nationwide: { en: '2–5 days delivery across Egypt', ar: 'توصيل 2–5 أيام لكل محافظات مصر' },
   cod_available: { en: 'Cash on delivery available', ar: 'الدفع عند الاستلام متاح' },
   shop_now: { en: 'Shop now', ar: 'اشترِ الآن' },
-  best_sellers: { en: 'Best sellers', ar: 'الأكثر مبيعاً' },
-  best_sellers_sub: { en: 'Most popular products right now', ar: 'الأكثر رواجاً الآن' },
+  new_arrivals: { en: 'New arrivals', ar: 'وصل حديثاً' },
+  new_arrivals_sub: { en: 'Latest additions to our catalog, ready to ship', ar: 'أحدث المنتجات المضافة إلى الكتالوج، جاهزة للشحن' },
   featured_sub: { en: 'Top picks, ready to ship', ar: 'منتجات مميزة جاهزة للشحن' },
 
   // PWA install

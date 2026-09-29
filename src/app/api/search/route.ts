@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
           { brand: { contains: q } },
         ],
       },
-      orderBy: { popularity: 'desc' },
+      orderBy: { createdAt: 'desc' },
       take: 8,
       select: {
         id: true, slug: true, nameEn: true, nameAr: true,

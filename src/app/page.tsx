@@ -7,12 +7,14 @@ import { HomeView } from "@/components/pharmacy/HomeView";
 export const revalidate = 300;
 
 export default async function Home() {
-  const [categories, featured, popular, all] = await Promise.all([
+  const [categories, featured, latest, all] = await Promise.all([
     getCategories(),
     // Homepage sections only merchandise in-stock items with real photos —
     // out-of-stock or artwork-fallback hero cards read as broken images.
     getProducts({ featured: true, limit: 8, inStock: true, hasImage: true }),
-    getProducts({ sort: "popular", limit: 8, inStock: true, hasImage: true }),
+    // "New arrivals" — real catalog additions, replaces the fabricated
+    // popularity/"best sellers" section (zero sales ever happened).
+    getProducts({ sort: "newest", limit: 8, inStock: true, hasImage: true }),
     // Unfiltered total powers the "genuine products" hero stat — a filtered
     // count (in-stock only) would understate the real catalog.
     getProducts({ limit: 1 }),
@@ -23,7 +25,7 @@ export default async function Home() {
       initial={{
         categories,
         featured,
-        popular,
+        popular: latest,
         totalAll: all.total,
       }}
     />

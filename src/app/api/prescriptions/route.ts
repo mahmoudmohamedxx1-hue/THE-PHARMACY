@@ -30,7 +30,7 @@ async function matchMedicines(names: string[]) {
     where: { OR: meds.flatMap((m) => [{ nameEn: { contains: m } }, { nameAr: { contains: m } }, { brand: { contains: m } }]) },
     take: 200,
   })
-  const all = products.length >= 6 ? products : await db.product.findMany({ take: 500, orderBy: { popularity: 'desc' } })
+  const all = products.length >= 6 ? products : await db.product.findMany({ take: 500, orderBy: { createdAt: 'desc' } })
 
   const results: { medicine: string; productId: string; nameEn: string; nameAr: string; price: number; stock: number; confidence: number; prescriptionRequired: boolean; brand: string; slug: string; imageUrl: string }[] = []
   for (const med of meds) {

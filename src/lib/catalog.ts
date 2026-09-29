@@ -33,9 +33,11 @@ export async function getCategories(): Promise<CategoryDTO[]> {
     include: { _count: { select: { products: true } } },
   })
 
+  // Category cover tiles: featured (store curation) first, then newest.
+  // Popularity scores were fabricated seed data — purged; order by real signals only.
   const covers = await db.product.findMany({
     where: { imageUrl: { not: '' }, stock: { gt: 0 } },
-    orderBy: [{ isFeatured: 'desc' }, { popularity: 'desc' }],
+    orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
     select: { categoryId: true, imageUrl: true },
   })
   const coverByCat = new Map<string, string>()
@@ -102,11 +104,12 @@ export async function getProducts(params: ProductQueryParams): Promise<ProductsD
 
   let orderBy: Prisma.ProductOrderByWithRelationInput[]
   switch (params.sort) {
-    case 'price-asc': orderBy = [{ price: 'asc' }, { popularity: 'desc' }]; break
-    case 'price-desc': orderBy = [{ price: 'desc' }, { popularity: 'desc' }]; break
-    case 'rating': orderBy = [{ rating: 'desc' }, { reviewCount: 'desc' }, { popularity: 'desc' }]; break
+    case 'price-asc': orderBy = [{ price: 'asc' }, { createdAt: 'desc' }]; break
+    case 'price-desc': orderBy = [{ price: 'desc' }, { createdAt: 'desc' }]; break
     case 'newest': orderBy = [{ createdAt: 'desc' }]; break
-    default: orderBy = [{ popularity: 'desc' }, { rating: 'desc' }]
+    // default = newest catalog additions (real, verifiable). 'popular' and
+    // 'rating' sorts were removed with the fabricated-seed-data purge.
+    default: orderBy = [{ createdAt: 'desc' }]
   }
 
   const [items, total, brandAgg] = await Promise.all([
@@ -141,7 +144,7 @@ export async function getProductDetail(idOrSlug: string) {
 
   const related = await db.product.findMany({
     where: { categoryId: product.categoryId, id: { not: product.id } },
-    orderBy: { popularity: 'desc' },
+    orderBy: { createdAt: 'desc' },
     take: 8,
   })
 

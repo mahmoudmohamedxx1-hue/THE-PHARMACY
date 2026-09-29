@@ -48,18 +48,18 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
   // react-query then refreshes in the background when the cache goes stale.
   const { data: categories = [] } = useCategories(initial?.categories)
   const { data: featured } = useProducts({ featured: 'true', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.featured)
-  const { data: popular } = useProducts({ sort: 'popular', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.popular)
+  const { data: latest } = useProducts({ sort: 'newest', limit: 8, inStock: 'true', hasImage: 'true' }, true, initial?.popular)
   const recentIds = useRecent((s) => s.ids)
   const { data: recentData } = useProductsByIds(recentIds.slice(0, 5), recentIds.length > 0)
 
-  const featuredItems: Product[] = featured?.items?.length ? featured.items : popular?.items || []
+  const featuredItems: Product[] = featured?.items?.length ? featured.items : latest?.items || []
   // Hero stat = real catalog total (sum of category counts — all 496 products,
   // not the filtered in-stock grid count). Consistent between SSR and client nav.
   const totalCount = categories.reduce((s, c) => s + (c.productCount || 0), 0)
     || initial?.totalAll
-    || popular?.total
+    || latest?.total
     || 0
-  const topBrands = (popular?.brands || []).filter((b) => b.count >= 3).slice(0, 12)
+  const topBrands = (latest?.brands || []).filter((b) => b.count >= 3).slice(0, 12)
   const recentItems: Product[] = recentIds.length && recentData?.items?.length
     ? recentIds.slice(0, 5).map((id) => recentData.items.find((p) => p.id === id)).filter(Boolean) as Product[]
     : []
@@ -254,18 +254,18 @@ export function HomeView({ initial }: { initial?: HomeInitialData }) {
         )}
       </section>
 
-      {/* ===== BEST SELLERS ===== */}
-      {popular?.items?.length ? (
+      {/* ===== NEW ARRIVALS ===== */}
+      {latest?.items?.length ? (
         <section className="max-w-7xl mx-auto w-full px-4 lg:px-6">
           <motion.div {...fade} className="flex items-end justify-between mb-2">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{t('best_sellers')}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{t('best_sellers_sub')}</p>
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{t('new_arrivals')}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t('new_arrivals_sub')}</p>
             </div>
           </motion.div>
           <div className="h-4" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {popular.items.slice(0, 8).map((p) => <ProductCard key={p.id} p={p} />)}
+            {latest.items.slice(0, 8).map((p) => <ProductCard key={p.id} p={p} />)}
           </div>
         </section>
       ) : null}

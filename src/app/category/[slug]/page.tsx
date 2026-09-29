@@ -40,11 +40,11 @@ export default async function CategoryPage({ params }: Props) {
   const exists = await db.category.findUnique({ where: { slug }, select: { slug: true } });
   if (!exists) notFound();
 
-  // SSR the default first page (unfiltered, sorted by popularity) so the
+  // SSR the default first page (unfiltered, sorted by newest) so the
   // grid paints immediately with the HTML; filters re-fetch client-side.
   const [categories, products] = await Promise.all([
     getCategories(),
-    getProducts({ category: slug, sort: "popular", page: 1, limit: 24 }),
+    getProducts({ category: slug, sort: "newest", page: 1, limit: 24 }),
   ]);
 
   // key={slug} forces a clean remount when switching categories

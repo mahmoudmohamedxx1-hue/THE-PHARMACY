@@ -188,3 +188,32 @@ The shipped catalog contains **zero fabricated social proof**:
 | Admin | `/admin` |
 
 Old hash links (`/#/p/<slug>`, `/#/c/<slug>`, …) are automatically redirected to the new clean URLs, so previously shared links keep working.
+
+## 7. Durable database (required before real orders)
+
+**The bundled SQLite file is read-only in practice on serverless hosting.**
+On Vercel every function instance gets its own ephemeral copy of
+`db/custom.db`: writes (orders, sessions, analytics) succeed on the instance
+that handled the request, then **vanish** when the instance recycles or the
+site redeploys. A customer's order would be confirmed and then silently lost —
+the admin dashboard shows an amber warning while this mode is active.
+
+Two layers of protection are already in place:
+
+- **Sessions** are stateless HMAC-signed tokens (`src/lib/auth.ts`), so login
+  works across instances. Set `SESSION_SECRET` (any long random string) in the
+  Vercel env for tokens that also survive redeploys.
+- **Order emails** are sent via Resend when `RESEND_API_KEY` + `RESEND_FROM`
+  are set — a durable out-of-band copy of every order even in ephemeral mode.
+
+To make orders durable, connect a hosted database and set `DATABASE_URL`:
+
+1. Create a free Postgres database (Vercel Postgres / Neon / Supabase).
+2. Set `DATABASE_URL` (and `SESSION_SECRET`) in Vercel → Settings → Environment Variables.
+3. Switch the Prisma datasource in `prisma/schema.prisma` to `postgresql`
+   (`@prisma/postgresql` provider) and run `npx prisma db push` + re-seed
+   the catalog (`scripts/` seed helpers) into the new database.
+4. Redeploy — the amber warning disappears once `DATABASE_URL` is present.
+
+Turso (libSQL) is a drop-in alternative that keeps the SQLite dialect; the
+Prisma adapter (`@prisma/adapter-libsql`) swap is equally small.

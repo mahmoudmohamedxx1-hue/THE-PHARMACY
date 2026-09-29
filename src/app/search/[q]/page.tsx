@@ -25,7 +25,7 @@ export default async function SearchPage({
   // SSR the first page of results so they paint with the HTML
   const [categories, products] = await Promise.all([
     getCategories(),
-    getProducts({ q: query, sort: "popular", page: 1, limit: 24 }),
+    getProducts({ q: query, sort: "newest", page: 1, limit: 24 }),
   ]);
 
   return (

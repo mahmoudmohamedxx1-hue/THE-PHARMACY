@@ -8,6 +8,8 @@ export interface AuthUser {
   id: string; email: string; name: string | null; phone: string | null; isAdmin: boolean
   /** Real registration date (ISO) — powers the honest "Member since" display. */
   createdAt?: string
+  /** True when the serverless deployment writes to ephemeral storage. */
+  dbEphemeral?: boolean
 }
 
 interface LangCtx {
@@ -34,7 +36,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/auth/me')
       const data = await res.json()
-      setUser(data.user || null)
+      setUser(data.user ? { ...data.user, dbEphemeral: data.dbEphemeral } : null)
     } catch {
       setUser(null)
     }
@@ -43,7 +45,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => r.json())
-      .then((d) => setUser(d.user || null))
+      .then((d) => setUser(d.user ? { ...d.user, dbEphemeral: d.dbEphemeral } : null))
       .catch(() => setUser(null))
   }, [])
 

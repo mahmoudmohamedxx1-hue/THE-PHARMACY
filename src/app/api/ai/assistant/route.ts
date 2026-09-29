@@ -18,11 +18,11 @@ export async function POST(req: NextRequest) {
       where: keywords.length
         ? { OR: keywords.flatMap((k) => [{ nameEn: { contains: k } }, { nameAr: { contains: k } }]) }
         : { isFeatured: true },
-      take: 20, orderBy: { popularity: 'desc' },
+      take: 20, orderBy: { createdAt: 'desc' },
       select: { nameEn: true, nameAr: true, brand: true, price: true, stock: true },
     })
     const fallback = products.length ? products : await db.product.findMany({
-      take: 20, orderBy: { popularity: 'desc' },
+      take: 20, orderBy: { createdAt: 'desc' },
       select: { nameEn: true, nameAr: true, brand: true, price: true, stock: true },
     })
     const catalog = fallback.map((p) => `- ${p.nameEn} | ${p.nameAr} | ${p.brand} | ${p.price} EGP`).join('\n')

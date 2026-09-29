@@ -110,6 +110,18 @@ export function AdminView() {
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 lg:px-6 py-8 pb-16 flex flex-col gap-8">
+      {/* Ephemeral-storage warning: writes on this deployment don't survive
+          instance recycles or redeploys — surfaced so orders are never
+          silently lost. Durable-DB setup steps live in DEPLOY.md. */}
+      {user?.dbEphemeral && (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900" role="alert">
+          <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+          <div className="text-sm leading-relaxed">
+            <p className="font-bold">{t('admin_db_warning')}</p>
+            <p className="mt-0.5">{t('admin_db_warning_sub')}</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3">
         <span className="w-11 h-11 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/25">
           <LayoutDashboard className="w-5.5 h-5.5" />

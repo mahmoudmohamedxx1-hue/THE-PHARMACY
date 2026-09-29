@@ -31,7 +31,7 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
   const category = categories.find((c) => c.slug === categorySlug)
 
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState('popular')
+  const [sort, setSort] = useState('newest')
   const [min, setMin] = useState(0)
   const [max, setMax] = useState(2500)
   const [brand, setBrand] = useState('')
@@ -48,7 +48,7 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
   // the query key changes with any filter, and seeding it there would be wrong.
   // (The server fetched this data WITH the current category/search query,
   // which are part of the query key, so they don't need excluding here.)
-  const isDefaultView = page === 1 && sort === 'popular'
+  const isDefaultView = page === 1 && sort === 'newest'
     && min === 0 && max === 2500 && !brand && !rx && !inStock
   const { data, isLoading } = useProducts(params, true, isDefaultView ? initial?.products : undefined)
   const items: Product[] = data?.items || []
@@ -158,11 +158,9 @@ export function CategoryView({ categorySlug, searchQuery, initial }: Props) {
               <SelectValue placeholder={t('sort_by')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="popular">{t('sort_popular')}</SelectItem>
+              <SelectItem value="newest">{t('sort_newest')}</SelectItem>
               <SelectItem value="price-asc">{t('sort_price_asc')}</SelectItem>
               <SelectItem value="price-desc">{t('sort_price_desc')}</SelectItem>
-              <SelectItem value="rating">{t('sort_rating')}</SelectItem>
-              <SelectItem value="newest">{t('sort_newest')}</SelectItem>
             </SelectContent>
           </Select>
 
